@@ -181,7 +181,6 @@ func fetchNewApiKey(creds Credentials) (string, error) {
 	}
 
 	// Armazena no cache
-	// Subtrai 2 minutos da expiração para renovar antes de expirar (margem de segurança)
 	apiKeyCache.Key = apiKeyResp.ApiKey
 	apiKeyCache.ExpiresAt = time.Now().Add(CacheEffectiveTime)
 

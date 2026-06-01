@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-void text-bone font-sans antialiased;
+    background-image: linear-gradient(180deg, #0a0b0d, #121419 60%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  /* Label "estêncil militar" — caps com tracking ampliado */
+  .label-stencil {
+    @apply font-display font-semibold uppercase tracking-[0.08em] text-ash;
+  }
+  /* Painel de superfície blindada */
+  .panel {
+    @apply rounded-md border border-graphite bg-gunmetal/70 shadow-tremor-card backdrop-blur-sm;
+  }
+  /* Valor financeiro mono tabular */
+  .value {
+    @apply font-mono;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Scrollbar discreta no clima aço */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0b0d;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c3038;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4b515c;
+}
+
+/* Pulso de reator (indicadores ativos) */
+@keyframes pulse-reactor {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(240, 58, 36, 0.6);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 4px rgba(240, 58, 36, 0.3);
+    opacity: 0.7;
+  }
+}
+.reactor-dot {
+  animation: pulse-reactor 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}

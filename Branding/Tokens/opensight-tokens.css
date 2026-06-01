@@ -1,0 +1,146 @@
+/* ============================================================================
+ * OpenSight — Design Tokens · Sistema "Warmind Carmesim"
+ * Versão 1.0.0 · 31/05/2026
+ * Fonte da verdade: ../PaletaDeCores.md e ../Tipografia.md
+ * Uso: importe este arquivo no root do frontend (React). Tema escuro é o padrão.
+ * ==========================================================================*/
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* --- Núcleo da marca: Carmesim Rasputin --- */
+  --os-crimson:        #C1121F;  /* PRIMÁRIA */
+  --os-crimson-deep:   #8A0B16;
+  --os-dried-blood:    #6A040F;
+  --os-ember:          #F03A24;  /* ACCENT / olho-reator */
+  --os-crimson-glow:   #FF4D3D;  /* somente efeitos de luz */
+
+  /* --- Neutros: Aço soviético & Void --- */
+  --os-void:           #0A0B0D;  /* fundo base */
+  --os-obsidian:       #121419;  /* superfície 1 */
+  --os-gunmetal:       #1C1F26;  /* superfície 2 */
+  --os-graphite:       #2C3038;  /* superfície 3 / bordas */
+  --os-steel:          #4B515C;
+  --os-ash:            #8C929C;  /* texto secundário */
+  --os-bone:           #E8E4DB;  /* texto primário */
+
+  /* --- Metal: Âmbar Warmind / Latão --- */
+  --os-brass:          #C8962C;
+  --os-brass-bright:   #E8B23E;
+  --os-amber-signal:   #E8A317;
+
+  /* --- Semânticas financeiras --- */
+  --os-gain:           #2FA572;
+  --os-gain-soft:      #1E5C44;
+  --os-loss:           #E5484D;  /* ≠ crimson da marca */
+  --os-loss-soft:      #5C1F24;
+  --os-warning:        #E8A317;
+  --os-info:           #5A92B0;
+  --os-neutral:        #8C929C;
+
+  /* --- Dataviz (sequência categórica) --- */
+  --os-chart-1:        #C1121F;
+  --os-chart-2:        #C8962C;
+  --os-chart-3:        #5A92B0;
+  --os-chart-4:        #2FA572;
+  --os-chart-5:        #9B6BC9;
+  --os-chart-6:        #E8A317;
+  --os-chart-7:        #6B7280;
+  --os-chart-8:        #D9737B;
+
+  /* --- Papéis semânticos de UI --- */
+  --os-bg:             var(--os-void);
+  --os-surface-1:      var(--os-obsidian);
+  --os-surface-2:      var(--os-gunmetal);
+  --os-surface-3:      var(--os-graphite);
+  --os-border:         var(--os-graphite);
+  --os-border-strong:  var(--os-steel);
+  --os-text:           var(--os-bone);
+  --os-text-muted:     var(--os-ash);
+  --os-accent:         var(--os-crimson);
+  --os-accent-hover:   var(--os-crimson-deep);
+  --os-focus-ring:     var(--os-ember);
+
+  /* --- Tipografia --- */
+  --os-font-display:   'Chakra Petch', 'Saira', system-ui, sans-serif;
+  --os-font-body:      'IBM Plex Sans', 'Inter', system-ui, sans-serif;
+  --os-font-mono:      'IBM Plex Mono', 'JetBrains Mono', monospace;
+
+  --os-text-display-xl: 3.815rem;
+  --os-text-display-l:  3.052rem;
+  --os-text-h1:         2.441rem;
+  --os-text-h2:         1.953rem;
+  --os-text-h3:         1.563rem;
+  --os-text-body-l:     1.25rem;
+  --os-text-body:       1rem;
+  --os-text-body-s:     0.8rem;
+  --os-text-caption:    0.7rem;
+
+  --os-tracking-stencil: 0.08em;
+  --os-leading-body:     1.6;
+  --os-leading-heading:  1.3;
+
+  /* --- Geometria & elevação --- */
+  --os-radius-sm:      2px;
+  --os-radius:         4px;   /* chanfro de placa de aço — discreto */
+  --os-radius-lg:      6px;
+  --os-border-width:   1px;
+
+  --os-shadow-panel:   0 1px 0 rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.45);
+  --os-glow-reactor:   0 0 12px rgba(240,58,36,0.55), 0 0 28px rgba(255,77,61,0.35);
+
+  /* --- Movimento (lento, mecânico, pulsante) --- */
+  --os-ease:           cubic-bezier(0.4, 0, 0.2, 1);
+  --os-dur-fast:       150ms;
+  --os-dur:            280ms;
+  --os-dur-slow:       400ms;
+
+  /* --- Gradientes & efeitos --- */
+  --os-grad-void-fade:    linear-gradient(180deg, var(--os-void), var(--os-obsidian));
+  --os-grad-brushed:      linear-gradient(135deg, var(--os-graphite), var(--os-gunmetal));
+  --os-grad-ember:        linear-gradient(135deg, var(--os-crimson-deep), var(--os-ember));
+  --os-grad-reactor:      radial-gradient(circle, var(--os-crimson-glow), transparent 70%);
+}
+
+/* ---- Base sugerida ---- */
+body {
+  background: var(--os-grad-void-fade);
+  color: var(--os-text);
+  font-family: var(--os-font-body);
+  line-height: var(--os-leading-body);
+}
+
+h1, h2, h3, .os-heading {
+  font-family: var(--os-font-display);
+  line-height: var(--os-leading-heading);
+}
+
+/* Label "estêncil militar" */
+.os-label-stencil {
+  font-family: var(--os-font-display);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--os-tracking-stencil);
+  font-size: var(--os-text-caption);
+  color: var(--os-text-muted);
+}
+
+/* Valor financeiro (mono tabular) */
+.os-value {
+  font-family: var(--os-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.os-value--gain { color: var(--os-gain); }
+.os-value--loss { color: var(--os-loss); }   /* nunca o crimson da marca */
+
+/* Pulso de reator (olho da harpia, estado ativo) */
+@keyframes os-pulse-reactor {
+  0%, 100% { box-shadow: var(--os-glow-reactor); opacity: 1; }
+  50%      { box-shadow: 0 0 6px rgba(240,58,36,0.35); opacity: 0.82; }
+}
+.os-reactor {
+  background: var(--os-ember);
+  border-radius: 50%;
+  animation: os-pulse-reactor 2.4s var(--os-ease) infinite;
+}

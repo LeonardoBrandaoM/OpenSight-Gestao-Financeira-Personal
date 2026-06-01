@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="OpenSight — emblema do olho-reator redimensionado">
+  <title>OpenSight — Emblema (olho-reator)</title>
+
+  <defs>
+    <linearGradient id="seal" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#15181E"/><stop offset="1" stop-color="#0A0B0D"/>
+    </linearGradient>
+    <filter id="reactorGlow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ===== SELO HEXAGONAL ===== -->
+  <polygon points="128,10 230.2,69 230.2,187 128,246 25.8,187 25.8,69"
+           fill="url(#seal)" stroke="#C8962C" stroke-width="3.2" stroke-linejoin="round"/>
+  <polygon points="128,27 215.5,77.5 215.5,178.5 128,229 40.5,178.5 40.5,77.5"
+           fill="none" stroke="#2C3038" stroke-width="1.3"/>
+
+  <!-- ===== OLHO-REATOR (redimensionado) ===== -->
+  <g filter="url(#reactorGlow)">
+    <!-- casca hexagonal -->
+    <polygon points="128,68 172,101 172,155 128,188 84,155 84,101"
+             fill="#6A040F" stroke="#A11521" stroke-width="2.6" stroke-linejoin="round"/>
+    <!-- disco brasa -->
+    <circle cx="128" cy="128" r="27" fill="#F03A24"/>
+    <!-- núcleo aceso -->
+    <circle cx="128" cy="128" r="11" fill="#FF6A5A"/>
+    <!-- reflexo -->
+    <circle cx="121" cy="121" r="3.4" fill="#FFE3D6" opacity="0.85"/>
+  </g>
+</svg>

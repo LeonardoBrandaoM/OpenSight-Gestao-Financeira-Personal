@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="OpenSight — símbolo da harpia">
+  <title>OpenSight — Símbolo da Harpia (Warmind Carmesim)</title>
+
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#363B45"/><stop offset="1" stop-color="#171A20"/>
+    </linearGradient>
+    <linearGradient id="feather" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4B515C"/><stop offset="1" stop-color="#23262E"/>
+    </linearGradient>
+    <linearGradient id="beakGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C9B07A"/><stop offset="0.55" stop-color="#8A7437"/><stop offset="1" stop-color="#4A3C1C"/>
+    </linearGradient>
+    <filter id="glow" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="4.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ===== CRISTA DUPLA (coroa de penas) ===== -->
+  <g fill="url(#feather)" stroke="#5A616C" stroke-width="1.4" stroke-linejoin="round">
+    <polygon points="128,92 98,98 70,30"/>
+    <polygon points="128,92 158,98 186,30"/>
+    <polygon points="124,94 110,100 102,48"/>
+    <polygon points="132,94 146,100 154,48"/>
+  </g>
+  <g fill="none" stroke="#C8962C" stroke-width="1.5" stroke-linecap="round">
+    <line x1="70" y1="30" x2="83" y2="62"/>
+    <line x1="186" y1="30" x2="173" y2="62"/>
+  </g>
+
+  <!-- ===== PLACA DA FACE (disco facial) ===== -->
+  <polygon points="96,90 160,90 178,114 172,150 150,180 128,198 106,180 84,150 78,114"
+           fill="url(#plate)" stroke="#5A616C" stroke-width="2.2" stroke-linejoin="round"/>
+  <g stroke="#3A3F49" stroke-width="1.1" fill="none" opacity="0.9">
+    <line x1="84" y1="150" x2="108" y2="178"/>
+    <line x1="172" y1="150" x2="148" y2="178"/>
+  </g>
+
+  <!-- ===== SOBRANCELHAS DE PREDADOR (dois arcos) ===== -->
+  <g fill="#0E1014" stroke="#5A616C" stroke-width="1.3" stroke-linejoin="round">
+    <polygon points="82,116 122,131 122,140 82,127"/>
+    <polygon points="174,116 134,131 134,140 174,127"/>
+  </g>
+
+  <!-- ===== OLHOS ===== -->
+  <!-- olho direito: apagado (aço) -->
+  <polygon points="152,137 162,145 162,157 152,164 142,157 142,145" fill="#1C1F26" stroke="#5A616C" stroke-width="1.3"/>
+  <polygon points="152,143 157,148 157,154 152,158 147,154 147,148" fill="#0A0B0D"/>
+  <!-- olho esquerdo: OLHO-REATOR (brasa + glow) -->
+  <g filter="url(#glow)">
+    <polygon points="104,137 114,145 114,157 104,164 94,157 94,145" fill="#6A040F" stroke="#A11521" stroke-width="1"/>
+    <circle cx="104" cy="150.5" r="6" fill="#F03A24"/>
+    <circle cx="104" cy="150.5" r="2.4" fill="#FF6A5A"/>
+  </g>
+
+  <!-- ===== BICO GANCHUDO (córneo) ===== -->
+  <polygon points="120,138 136,138 140,158 132,176 128,187 124,176 116,158"
+           fill="url(#beakGrad)" stroke="#7A6428" stroke-width="1.4" stroke-linejoin="round"/>
+  <!-- narinas -->
+  <circle cx="124" cy="148" r="1.4" fill="#3A2F12"/>
+  <circle cx="132" cy="148" r="1.4" fill="#3A2F12"/>
+  <!-- gancho da ponta -->
+  <polygon points="124,176 132,176 128,187" fill="#2A220E"/>
+</svg>
