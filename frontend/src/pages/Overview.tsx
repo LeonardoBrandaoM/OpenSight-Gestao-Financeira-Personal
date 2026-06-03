@@ -5,14 +5,12 @@ import {
   CashflowBars,
   CategoryBar,
   CategoryDonut,
-  ProjectionLines,
-} from '../components/charts';
-import {
   ComparativoComposed,
   EvolucaoArea,
+  ProjectionLines,
   ReceitasDespesasDonut,
   WaterfallChart,
-} from '../components/chartsExtra';
+} from '../charts';
 import { BudgetList } from '../components/BudgetList';
 import { TransactionsTable } from '../components/TransactionsTable';
 

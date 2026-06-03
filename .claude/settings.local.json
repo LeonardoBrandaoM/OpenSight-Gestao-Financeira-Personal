@@ -13,7 +13,8 @@
       "Bash(kill 63705 62966 63705)",
       "Bash(rm -f _dashboard.png _dashboard_top.png _dashboard2.png _dashboard3.png)",
       "Bash(ls -la graphrefs/)",
-      "Bash(file graphrefs/*)"
+      "Bash(file graphrefs/*)",
+      "WebFetch(domain:dashboard.belvo.com)"
     ]
   }
 }

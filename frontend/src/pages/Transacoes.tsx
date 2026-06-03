@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { transacoes } from '../data/mock';
 import { Panel } from '../components/ui';
 import { TransactionsTable } from '../components/TransactionsTable';
-import { FluxoSankey, HorarioPicoHeatmap, MetodoPagamentoDonut } from '../components/chartsExtra';
+import { FluxoSankey, HorarioPicoHeatmap, MetodoPagamentoDonut } from '../charts';
 import { brl } from '../theme/tokens';
 
 export function Transacoes() {
@@ -29,6 +29,20 @@ export function Transacoes() {
 
   return (
     <div className="space-y-4 p-6">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Panel title="Horário de pico das transações" note="dia × hora">
+          <HorarioPicoHeatmap />
+        </Panel>
+        <Panel title="Distribuição por método de pagamento" note="rosca">
+          <MetodoPagamentoDonut />
+        </Panel>
+      </section>
+
+      <Panel title="Fluxo financeiro: tipo → categoria → estabelecimento" note="sankey">
+        <FluxoSankey />
+      </Panel>
+
+      {/* Transações em si — sempre por último, na parte mais baixa da tela. */}
       <Panel
         title="Transações"
         note={
@@ -59,19 +73,6 @@ export function Transacoes() {
         </div>
 
         <TransactionsTable data={filtradas} />
-      </Panel>
-
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel title="Horário de pico das transações" note="dia × hora">
-          <HorarioPicoHeatmap />
-        </Panel>
-        <Panel title="Distribuição por método de pagamento" note="rosca">
-          <MetodoPagamentoDonut />
-        </Panel>
-      </section>
-
-      <Panel title="Fluxo financeiro: tipo → categoria → estabelecimento" note="sankey">
-        <FluxoSankey />
       </Panel>
     </div>
   );

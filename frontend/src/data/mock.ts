@@ -60,13 +60,100 @@ export const budgets: Budget[] = [
   { categoria: 'Assinaturas', gasto: 380, meta: 350 },
 ];
 
+// ----- Sugestões de orçamento automático (budget-service) -----
+// Heurística do MVP: média dos últimos 3 meses por categoria, com folga de 10%
+// e arredondamento para a dezena. Categorias com metaAtual = null ainda não
+// têm orçamento definido (a sugestão serve para introduzi-las).
+export interface SugestaoOrcamento {
+  categoria: string;
+  media3m: number; // média de gasto dos últimos 3 meses
+  metaAtual: number | null; // meta vigente (null = categoria sem orçamento)
+  tendencia: number; // variação % do gasto vs. trimestre anterior
+}
+export const sugestoesOrcamento: SugestaoOrcamento[] = [
+  { categoria: 'Alimentação', media3m: 1540, metaAtual: 1600, tendencia: 4.2 },
+  { categoria: 'Transporte', media3m: 720, metaAtual: 700, tendencia: 8.1 },
+  { categoria: 'Lazer', media3m: 590, metaAtual: 800, tendencia: -6.5 },
+  { categoria: 'Assinaturas', media3m: 372, metaAtual: 350, tendencia: 1.2 },
+  { categoria: 'Moradia', media3m: 2080, metaAtual: null, tendencia: 0.6 },
+  { categoria: 'Saúde', media3m: 455, metaAtual: null, tendencia: -3.4 },
+  { categoria: 'Compras', media3m: 600, metaAtual: null, tendencia: 12.7 },
+];
+
+// Meta sugerida: média dos 3 meses − 10%, arredondada para a dezena.
+export const sugerirMeta = (media3m: number) => Math.round((media3m * 0.9) / 10) * 10;
+
+// Gasto do mês corrente por categoria (fonte única p/ orçamento manual e sugestões).
+export const gastoPorCategoria: Record<string, number> = {
+  Alimentação: 1480,
+  Transporte: 760,
+  Lazer: 640,
+  Assinaturas: 380,
+  Moradia: 2080,
+  Saúde: 410,
+  Compras: 600,
+};
+
+// ----- Tipos de transação: base + personalizados (RF-004) -----
+// efeito de fluxo: 'entra' (receita), 'sai' (despesa), 'neutro' (não computa no fluxo).
+export type EfeitoFluxo = 'entra' | 'sai' | 'neutro';
+export interface TipoTransacao {
+  id: string;
+  nome: string;
+  efeito: EfeitoFluxo;
+  base: boolean; // tipos base não podem ser removidos
+}
+export const tiposTransacao: TipoTransacao[] = [
+  { id: 'debito', nome: 'Débito', efeito: 'sai', base: true },
+  { id: 'credito', nome: 'Crédito', efeito: 'entra', base: true },
+  { id: 'transferencia', nome: 'Transferência', efeito: 'neutro', base: true },
+  { id: 'reembolso', nome: 'Reembolso', efeito: 'entra', base: false },
+  { id: 'invest-recorrente', nome: 'Investimento recorrente', efeito: 'sai', base: false },
+];
+
+// ----- Categorias cadastradas: 12 base + personalizadas (RF-004) -----
+export type TipoCategoria = 'receita' | 'despesa' | 'transferencia';
+export interface CategoriaCadastro {
+  id: string;
+  nome: string;
+  cor: string;
+  tipo: TipoCategoria;
+  base: boolean; // categorias base coexistem e não são removidas
+  pai?: string | null; // nome da categoria-pai (subcategoria), quando houver
+}
+export const categoriasCadastro: CategoriaCadastro[] = [
+  { id: 'alimentacao', nome: 'Alimentação', cor: '#C1121F', tipo: 'despesa', base: true },
+  { id: 'transporte', nome: 'Transporte', cor: '#C8962C', tipo: 'despesa', base: true },
+  { id: 'moradia', nome: 'Moradia', cor: '#5A92B0', tipo: 'despesa', base: true },
+  { id: 'saude', nome: 'Saúde', cor: '#2FA572', tipo: 'despesa', base: true },
+  { id: 'educacao', nome: 'Educação', cor: '#9B6BC9', tipo: 'despesa', base: true },
+  { id: 'lazer', nome: 'Lazer', cor: '#E8A317', tipo: 'despesa', base: true },
+  { id: 'compras', nome: 'Compras', cor: '#6B7280', tipo: 'despesa', base: true },
+  { id: 'servicos', nome: 'Serviços', cor: '#D9737B', tipo: 'despesa', base: true },
+  { id: 'investimentos', nome: 'Investimentos', cor: '#1E5C44', tipo: 'despesa', base: true },
+  { id: 'receitas', nome: 'Receitas', cor: '#2FA572', tipo: 'receita', base: true },
+  { id: 'transferencias', nome: 'Transferências', cor: '#4B515C', tipo: 'transferencia', base: true },
+  { id: 'outros', nome: 'Outros', cor: '#8C929C', tipo: 'despesa', base: true },
+  // Exemplos personalizados pré-existentes
+  { id: 'assinaturas', nome: 'Assinaturas', cor: '#F03A24', tipo: 'despesa', base: false, pai: 'Lazer' },
+  { id: 'pets', nome: 'Pets', cor: '#E8B23E', tipo: 'despesa', base: false },
+];
+
+// Paleta sugerida para o seletor de cor ao criar categorias.
+export const paletaCategoria = [
+  '#C1121F', '#F03A24', '#C8962C', '#E8A317', '#2FA572', '#5A92B0', '#9B6BC9', '#D9737B', '#6B7280', '#8C929C',
+];
+
+// `ajustado` = projeção realista refinada pela trajetória mediana de pares
+// bem-sucedidos da mesma faixa de renda (RF-008 híbrido). Só é exibida quando
+// o consentimento de benchmarking está ativo.
 export const projecao = [
-  { mes: 'Jun', otimista: 49600, realista: 49100, pessimista: 48400 },
-  { mes: 'Jul', otimista: 51200, realista: 50100, pessimista: 48700 },
-  { mes: 'Ago', otimista: 52900, realista: 51000, pessimista: 48900 },
-  { mes: 'Set', otimista: 54700, realista: 52050, pessimista: 49100 },
-  { mes: 'Out', otimista: 56600, realista: 53200, pessimista: 49400 },
-  { mes: 'Nov', otimista: 58600, realista: 54300, pessimista: 49600 },
+  { mes: 'Jun', otimista: 49600, realista: 49100, pessimista: 48400, ajustado: 49350 },
+  { mes: 'Jul', otimista: 51200, realista: 50100, pessimista: 48700, ajustado: 50650 },
+  { mes: 'Ago', otimista: 52900, realista: 51000, pessimista: 48900, ajustado: 51950 },
+  { mes: 'Set', otimista: 54700, realista: 52050, pessimista: 49100, ajustado: 53350 },
+  { mes: 'Out', otimista: 56600, realista: 53200, pessimista: 49400, ajustado: 54900 },
+  { mes: 'Nov', otimista: 58600, realista: 54300, pessimista: 49600, ajustado: 56450 },
 ];
 
 export interface Transacao {
@@ -100,14 +187,142 @@ export interface Conta {
   apelido: string;
   saldo: number;
   delta: number;
+  // Cartão de crédito
+  limiteTotal?: number;
+  faturaAtual?: number;
+  vencimento?: string; // dd/mm
+  fechamento?: string; // dd/mm
+  // Investimentos: composição da carteira por classe (soma = saldo)
+  alocacao?: { classe: string; valor: number }[];
 }
 export const contas: Conta[] = [
   { instituicao: 'Itaú', tipo: 'Conta corrente', apelido: '•••• 4471', saldo: 15400.0, delta: 0.8 },
   { instituicao: 'Nubank', tipo: 'Conta corrente', apelido: '•••• 8820', saldo: 8230.71, delta: 2.1 },
   { instituicao: 'Inter', tipo: 'Conta corrente', apelido: '•••• 1190', saldo: 4600.0, delta: -1.2 },
-  { instituicao: 'XP', tipo: 'Investimentos', apelido: 'Carteira', saldo: 22480.34, delta: 3.6 },
-  { instituicao: 'Nubank', tipo: 'Cartão de crédito', apelido: '•••• 3041', saldo: -2480.34, delta: 5.1 },
+  {
+    instituicao: 'XP',
+    tipo: 'Investimentos',
+    apelido: 'Carteira',
+    saldo: 22480.34,
+    delta: 3.6,
+    alocacao: [
+      { classe: 'Renda fixa', valor: 11200.0 },
+      { classe: 'Ações', valor: 6480.34 },
+      { classe: 'FIIs', valor: 3200.0 },
+      { classe: 'Cripto', valor: 1600.0 },
+    ],
+  },
+  {
+    instituicao: 'Nubank',
+    tipo: 'Cartão de crédito',
+    apelido: '•••• 3041',
+    saldo: -2480.34,
+    delta: 5.1,
+    limiteTotal: 5000.0,
+    faturaAtual: 2480.34,
+    vencimento: '10/06',
+    fechamento: '03/06',
+  },
 ];
+
+// ===== Detalhamento de uma conta (overview individual) =====
+// Deriva um histórico de saldo, uma carteira de transações e a quebra por
+// categoria de forma determinística a partir da conta (mock até o backend existir).
+function hashStr(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 2147483647;
+  return h || 1;
+}
+
+const detalheMeses = ['Nov', 'Dez', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai'];
+
+const poolDespesas = [
+  { descricao: 'Supermercado Pão de Açúcar', categoria: 'Alimentação' },
+  { descricao: 'Posto Shell', categoria: 'Transporte' },
+  { descricao: 'Farmácia Drogasil', categoria: 'Saúde' },
+  { descricao: 'Restaurante', categoria: 'Alimentação' },
+  { descricao: 'Spotify', categoria: 'Assinaturas' },
+  { descricao: 'Loja online', categoria: 'Compras' },
+  { descricao: 'Conta de energia', categoria: 'Utilidades' },
+  { descricao: 'Uber', categoria: 'Transporte' },
+  { descricao: 'Cinema', categoria: 'Lazer' },
+];
+const poolReceitas = [
+  { descricao: 'Salário', categoria: 'Receita' },
+  { descricao: 'Transferência recebida', categoria: 'Transferência' },
+  { descricao: 'Reembolso amigo', categoria: 'Transferência' },
+];
+const poolInvest = [
+  { descricao: 'Aporte CDB', categoria: 'Investimento' },
+  { descricao: 'Rendimento da carteira', categoria: 'Receita' },
+  { descricao: 'Compra de ações', categoria: 'Investimento' },
+  { descricao: 'Dividendos', categoria: 'Receita' },
+];
+
+export interface ContaDetalheData {
+  conta: Conta;
+  historico: { mes: string; saldo: number }[];
+  transacoes: Transacao[];
+  porCategoria: { nome: string; valor: number }[];
+  entradas: number;
+  saidas: number;
+}
+
+export function getContaDetalhe(index: number): ContaDetalheData | null {
+  const conta = contas[index];
+  if (!conta) return null;
+
+  const r = rng(hashStr(conta.instituicao + conta.apelido + conta.tipo));
+  const cartao = conta.tipo === 'Cartão de crédito';
+  const investimento = conta.tipo === 'Investimentos';
+
+  // Histórico de saldo: 7 meses terminando no saldo atual, com passos suaves.
+  const passos = detalheMeses.map(() => (r() - 0.45) * Math.max(Math.abs(conta.saldo) * 0.06, 300));
+  let acc = conta.saldo;
+  const historicoRev: { mes: string; saldo: number }[] = [];
+  for (let i = detalheMeses.length - 1; i >= 0; i--) {
+    historicoRev.push({ mes: detalheMeses[i], saldo: Math.round(acc * 100) / 100 });
+    acc -= passos[i];
+  }
+  const historico = historicoRev.reverse();
+
+  // Transações do mês corrente para a conta.
+  const pool = investimento ? poolInvest : cartao ? poolDespesas : [...poolDespesas, ...poolReceitas];
+  const n = 6 + Math.floor(r() * 5);
+  const dias = new Set<number>();
+  const transacoes: Transacao[] = [];
+  for (let i = 0; i < n; i++) {
+    const item = pool[Math.floor(r() * pool.length)];
+    const receita = item.categoria === 'Receita' || item.categoria === 'Transferência';
+    const base = receita ? 400 + r() * 4000 : 20 + r() * 480;
+    const valor = (receita ? 1 : -1) * Math.round(base * 100) / 100;
+    let dia = 1 + Math.floor(r() * 30);
+    while (dias.has(dia)) dia = 1 + ((dia + 3) % 30);
+    dias.add(dia);
+    transacoes.push({
+      data: `${String(dia).padStart(2, '0')}/05`,
+      descricao: item.descricao,
+      categoria: item.categoria,
+      conta: `${conta.instituicao} ${conta.apelido}`,
+      valor,
+    });
+  }
+  transacoes.sort((a, b) => Number(b.data.slice(0, 2)) - Number(a.data.slice(0, 2)));
+
+  const entradas = transacoes.filter((t) => t.valor > 0).reduce((s, t) => s + t.valor, 0);
+  const saidas = transacoes.filter((t) => t.valor < 0).reduce((s, t) => s + t.valor, 0);
+
+  const catMap = new Map<string, number>();
+  for (const t of transacoes) {
+    if (t.valor >= 0) continue;
+    catMap.set(t.categoria, (catMap.get(t.categoria) ?? 0) + Math.abs(t.valor));
+  }
+  const porCategoria = Array.from(catMap, ([nome, valor]) => ({ nome, valor: Math.round(valor * 100) / 100 })).sort(
+    (a, b) => b.valor - a.valor,
+  );
+
+  return { conta, historico, transacoes, porCategoria, entradas, saidas };
+}
 
 // ===== Alertas (analytics-service / budget-service / consent-service) =====
 export interface Alerta {
@@ -385,3 +600,148 @@ export const sankeyData = {
     { source: 6, target: 16, value: 2153 },
   ],
 };
+
+// ============================================================================
+// Benchmarking por classes / coorte de pares (RF-012, RNF-013, RN-008..010)
+// Dados agregados e anonimizados — nunca representam um usuário individual.
+// ============================================================================
+
+export interface ComparativoCohort {
+  metrica: string;
+  voce: number;
+  mediana: number; // mediana dos pares bem-sucedidos da mesma faixa
+  unidade: string;
+  maiorMelhor: boolean; // se valor maior é melhor (poupança) ou pior (gasto)
+}
+export interface DriverCohort {
+  tipo: 'sucesso' | 'fracasso';
+  texto: string;
+}
+export const cohort = {
+  faixaRenda: '5–10 salários mínimos',
+  membros: 1284, // pares consentidos na coorte
+  kMinimo: 30, // k-anonimato (RN-010): coorte só aparece acima deste limiar
+  trajetoria: 'melhorou' as 'melhorou' | 'estavel' | 'decaiu',
+  taxaCumprimentoVoce: 75, // % de metas cumpridas (RN-009)
+  taxaCumprimentoMediana: 61,
+  comparativos: [
+    { metrica: 'Taxa de poupança', voce: 22, mediana: 17, unidade: '% da renda', maiorMelhor: true },
+    { metrica: 'Metas cumpridas', voce: 75, mediana: 61, unidade: '%', maiorMelhor: true },
+    { metrica: 'Gasto em Moradia', voce: 31, mediana: 34, unidade: '% da renda', maiorMelhor: false },
+    { metrica: 'Gasto em Lazer', voce: 8, mediana: 11, unidade: '% da renda', maiorMelhor: false },
+    { metrica: 'Gasto em Assinaturas', voce: 4.1, mediana: 2.6, unidade: '% da renda', maiorMelhor: false },
+  ] as ComparativoCohort[],
+  drivers: [
+    { tipo: 'sucesso', texto: 'Pares que melhoraram mantêm Moradia abaixo de 30% da renda.' },
+    { tipo: 'sucesso', texto: 'Aporte automático em investimentos no início do mês, antes dos gastos.' },
+    { tipo: 'fracasso', texto: 'Gasto recorrente em Assinaturas acima da mediana derruba a poupança.' },
+    { tipo: 'fracasso', texto: 'Metas de Lazer raramente revisadas acompanham quem decaiu de faixa.' },
+  ] as DriverCohort[],
+  recomendacoes: [
+    'Reduza Assinaturas em ~R$ 60/mês para se alinhar à mediana de poupança da sua faixa.',
+    'Defina meta de Lazer em ~9% da renda, padrão dos pares que melhoraram.',
+    'Agende um aporte automático no início do mês, como 68% dos bem-sucedidos.',
+  ],
+};
+
+// ============================================================================
+// Investimentos — página dedicada (investment-service)
+// ============================================================================
+export const investResumo = {
+  total: 22480.34,
+  rendimentoMes: 3.6, // % no mês
+  rentabilidade12m: 11.8, // % nos últimos 12 meses
+  aporteMes: 800.0,
+};
+
+// Composição da carteira por classe (soma = total).
+export const carteiraAlocacao = [
+  { classe: 'Renda fixa', valor: 11200.0 },
+  { classe: 'Ações', valor: 6480.34 },
+  { classe: 'FIIs', valor: 3200.0 },
+  { classe: 'Cripto', valor: 1600.0 },
+];
+
+// Evolução do valor da carteira (8 meses).
+export const carteiraEvolucao = [
+  { mes: 'Nov', valor: 18900 },
+  { mes: 'Dez', valor: 19600 },
+  { mes: 'Jan', valor: 20100 },
+  { mes: 'Fev', valor: 20800 },
+  { mes: 'Mar', valor: 21200 },
+  { mes: 'Abr', valor: 21650 },
+  { mes: 'Mai', valor: 22050 },
+  { mes: 'Jun', valor: 22480.34 },
+];
+
+// Rentabilidade por classe no mês (%).
+export const rendimentoPorClasse = [
+  { classe: 'Cripto', rendimento: 12.4 },
+  { classe: 'Ações', rendimento: 5.2 },
+  { classe: 'FIIs', rendimento: 2.1 },
+  { classe: 'Renda fixa', rendimento: 0.9 },
+];
+
+export interface PosicaoInvest {
+  ativo: string;
+  classe: string;
+  valor: number;
+  rendimento: number; // % no mês
+}
+export const posicoes: PosicaoInvest[] = [
+  { ativo: 'Tesouro Selic 2029', classe: 'Renda fixa', valor: 7000.0, rendimento: 0.8 },
+  { ativo: 'CDB Banco X 110% CDI', classe: 'Renda fixa', valor: 4200.0, rendimento: 1.0 },
+  { ativo: 'PETR4', classe: 'Ações', valor: 2600.0, rendimento: 6.1 },
+  { ativo: 'VALE3', classe: 'Ações', valor: 1980.34, rendimento: 5.9 },
+  { ativo: 'ITUB4', classe: 'Ações', valor: 1900.0, rendimento: 3.4 },
+  { ativo: 'HGLG11', classe: 'FIIs', valor: 3200.0, rendimento: 2.1 },
+  { ativo: 'Bitcoin', classe: 'Cripto', valor: 1600.0, rendimento: 12.4 },
+];
+
+// ============================================================================
+// Cartões de crédito — página dedicada (card-service)
+// ============================================================================
+export const cartaoResumo = {
+  instituicao: 'Nubank',
+  apelido: '•••• 3041',
+  limiteTotal: 5000.0,
+  faturaAtual: 2480.34,
+  vencimento: '10/06',
+  fechamento: '03/06',
+  melhorDiaCompra: '04',
+};
+
+// Histórico das últimas faturas (6 meses).
+export const faturaHistorico = [
+  { mes: 'Dez', valor: 1980 },
+  { mes: 'Jan', valor: 2250 },
+  { mes: 'Fev', valor: 2120 },
+  { mes: 'Mar', valor: 2680 },
+  { mes: 'Abr', valor: 2310 },
+  { mes: 'Mai', valor: 2480.34 },
+];
+
+// Gastos do cartão por categoria (fatura atual; soma = fatura).
+export const cartaoPorCategoria = [
+  { nome: 'Alimentação', valor: 760.0 },
+  { nome: 'Compras', valor: 540.0 },
+  { nome: 'Transporte', valor: 410.0 },
+  { nome: 'Assinaturas', valor: 380.0 },
+  { nome: 'Saúde', valor: 210.0 },
+  { nome: 'Lazer', valor: 180.34 },
+];
+
+export interface LancamentoCartao {
+  data: string;
+  descricao: string;
+  categoria: string;
+  valor: number;
+}
+export const cartaoLancamentos: LancamentoCartao[] = [
+  { data: '30/05', descricao: 'Supermercado Pão de Açúcar', categoria: 'Alimentação', valor: -287.4 },
+  { data: '28/05', descricao: 'Posto Shell', categoria: 'Transporte', valor: -210.0 },
+  { data: '26/05', descricao: 'Amazon', categoria: 'Compras', valor: -349.9 },
+  { data: '24/05', descricao: 'Cinema', categoria: 'Lazer', valor: -64.0 },
+  { data: '22/05', descricao: 'Farmácia Drogasil', categoria: 'Saúde', valor: -96.3 },
+  { data: '20/05', descricao: 'Spotify', categoria: 'Assinaturas', valor: -21.9 },
+];

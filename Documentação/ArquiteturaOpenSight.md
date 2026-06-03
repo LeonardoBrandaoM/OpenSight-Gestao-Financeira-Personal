@@ -2,11 +2,11 @@
 
 ## Open Sight - Sistema de Gestao Financeira Pessoal via Open Finance
 
-**Versao:** 1.0.0  
-**Data:** 09/04/2026  
+**Versao:** 1.1.0  
+**Data:** 02/06/2026  
 **Status:** Draft  
 **Autor:** Leonardo Brandao Maia Filho  
-**Referencia:** SRS Gestor Financeiro v0.0.003  
+**Referencia:** SRS Gestor Financeiro v0.0.005  
 
 ---
 
@@ -119,8 +119,8 @@ A arquitetura segue um modelo de 6 camadas horizontais, onde cada camada adicion
 ### 3.6 categorization-service (Python + Go wrapper)
 | Aspecto | Detalhe |
 |---------|---------|
-| **Responsabilidade** | Categorizacao ML (alvo: 85% acuracia), aprendizado com correcoes do usuario (RN-001 — 3 correcoes criam regra implicita por 6 meses), motor de regras personalizadas |
-| **Database** | `categorization_db` — categories, user_rules, model_metadata |
+| **Responsabilidade** | Categorizacao ML (alvo: 85% acuracia), aprendizado com correcoes do usuario (RN-001 — 3 correcoes criam regra implicita por 6 meses), motor de regras personalizadas, **categorias e tipos de transacao personalizados** (RF-004) |
+| **Database** | `categorization_db` — categories (com `categoria_pai_id` p/ subcategorias e flag `arquivada`), transaction_types (base + custom, com `efeito_fluxo` entra/sai/neutro), user_rules, model_metadata |
 | **ML** | Inference via gRPC (baixa latencia), modelo armazenado em S3 criptografado |
 | **Eventos** | Publica: `transaction.categorized` |
 
@@ -134,14 +134,15 @@ A arquitetura segue um modelo de 6 camadas horizontais, onde cada camada adicion
 | Aspecto | Detalhe |
 |---------|---------|
 | **Responsabilidade** | Projecoes financeiras (3/6/12 meses), simulacao "E se...", cenarios otimista/realista/pessimista, deteccao de recorrencias, alerta de saldo negativo futuro |
+| **Metodo hibrido** | Baseline estatistico (cenarios) sempre disponivel + **camada de ajuste por pares**: quando ha consentimento, refina a projecao realista com trajetorias medianas de pares bem-sucedidos vindas do `cohort-analytics-service` (3.13). Sem consentimento → apenas baseline (RF-008) |
 | **Database** | `projection_db` — projections, scenarios, recurring_patterns |
 | **Regra** | Requer minimo 60 dias de historico OU 20 transacoes (RN-004) |
 
 ### 3.9 budget-service (Go)
 | Aspecto | Detalhe |
 |---------|---------|
-| **Responsabilidade** | Metas orcamentarias mensais por categoria, alertas progressivos (50%/80%/100%), historico de compliance, sugestao automatica (media 3 meses - 10%) |
-| **Database** | `budget_db` — goals, goal_progress, alert_history |
+| **Responsabilidade** | Metas orcamentarias **flexiveis** para qualquer categoria (base ou custom) e **horizontes variados** (semanal/mensal/trimestral/anual/custom), alertas progressivos (50%/80%/100%), historico de compliance, sugestao automatica (media 3 meses - 10%) e **sugestao por pares** (via cohort-analytics-service, quando consentido) |
+| **Database** | `budget_db` — goals (com `periodo_tipo`/`periodo_inicio`/`periodo_fim`), goal_progress, alert_history |
 
 ### 3.10 notification-service (Go)
 | Aspecto | Detalhe |
@@ -162,6 +163,18 @@ A arquitetura segue um modelo de 6 camadas horizontais, onde cada camada adicion
 | **Responsabilidade** | Log de auditoria imutavel, retencao 5 anos, deteccao de adulteracao (hash chaining), relatorios de compliance |
 | **Database** | `audit_db` — **append-only** (sem permissao UPDATE/DELETE nas tabelas de audit) + S3 cold storage |
 | **Integridade** | Cada registro contem hash do registro anterior (cadeia de integridade) |
+
+### 3.13 cohort-analytics-service (Go + Python) — FASE FUTURA
+
+| Aspecto | Detalhe |
+|---------|---------|
+| **Responsabilidade** | Segmentacao de usuarios por faixa de renda (classes), calculo de trajetoria (melhorou/estavel/decaiu) e taxa de cumprimento de metas, identificacao de drivers de sucesso/fracasso e geracao de recomendacoes de pares (RF-012) |
+| **Fonte de dados** | **Le SOMENTE do bucket S3 anonimizado** (6.4/6.6). NAO acessa databases de producao com PII (mesmo isolamento IAM + rede do treinamento ML) |
+| **Consentimento** | Opt-in (Tipo A, default OFF). So processa dados de usuarios com `consentimento_benchmarking = true` (RNF-013) |
+| **Privacidade** | k-anonimato (coorte minima de k membros, RN-010) + agregacao com privacidade diferencial; nenhuma metrica individual de pares e exposta |
+| **Database** | `cohort_db` — agregados de coorte por faixa, drivers, recomendacoes (sem PII, sem link de volta ao usuario) |
+| **Eventos** | Consome dataset anonimizado; publica `cohort.recommendations.updated` (consumido por projection-service e budget-service) |
+| **Segmentacao de renda** | Inferida de receitas recorrentes (read-only) + confirmacao do usuario; bandas, nunca valor exato (RN-008) |
 
 ---
 
@@ -379,7 +392,8 @@ RDS PostgreSQL (subnet isolada de dados, Security Groups restritos)
 
 **Tipo A — Consentimento da Plataforma (LGPD Art. 7):**
 - Coletado no cadastro
-- Toggles granulares: processamento de dados, analytics, treinamento ML, comunicacoes por email
+- Toggles granulares: processamento de dados, analytics, treinamento ML, comunicacoes por email, **benchmarking de pares / dados de coorte (default OFF)**
+- O toggle de benchmarking gateia a participacao no `cohort-analytics-service` (RF-012/RNF-013); sem ele, o usuario nao entra em nenhuma coorte
 - Armazenado com: timestamp, IP, user-agent, versao do termo
 - Re-consentimento obrigatorio quando termos mudam
 
@@ -407,6 +421,7 @@ RDS PostgreSQL (subnet isolada de dados, Security Groups restritos)
    h. projection-service: deleta projecoes e cenarios
    i. budget-service: deleta metas
    j. notification-service: deleta preferencias e historico de entrega
+   k. cohort-analytics-service: remove o usuario das bases de coorte e descarta seu perfil de segmentacao
 5. Cada servico publica `deletion.completed.{service_name}`
 6. privacy-service rastreia conclusao de todos os servicos (saga coordinator)
 7. Quando TODOS confirmam → exclusao marcada como completa
@@ -451,6 +466,36 @@ categorization-service ML training (le SOMENTE do bucket S3 anonimizado)
 3. **Na deteccao:** privacy-service cria breach record, notifica DPO imediatamente
 4. **Relogio de 72 horas inicia** — sistema auto-envia notificacoes para usuarios afetados e ANPD se DPO aprovar dentro do prazo
 5. Templates de comunicacao pre-aprovados pelo juridico
+
+### 6.6 Privacidade de Coorte (Benchmarking por Classes)
+
+Suporta o RF-012 sob as garantias do RNF-013. Reaproveita e estende o pipeline anonimizado de 6.4.
+
+```
+transaction-service + budget-service (fonte)
+  ↓
+anonymization-job (6.4) — ja remove IDs, nomes/CPFs, arredonda valores, datas relativas
+  ↓
+cohort-build-job (batch agendado, namespace isolado, SEM acesso a producao):
+  1. Le SOMENTE o bucket S3 anonimizado
+  2. Inclui apenas usuarios com consentimento_benchmarking = true (RNF-013)
+  3. Segmenta por faixa de renda (bandas, nunca valor exato — RN-008)
+  4. Calcula trajetoria e taxa de cumprimento de metas (RN-009)
+  5. Suprime qualquer coorte com menos de k membros (k-anonimato, RN-010)
+  6. Aplica privacidade diferencial (ruido/epsilon) nas metricas de grupo
+  7. Deriva drivers de sucesso/fracasso e recomendacoes agregadas
+  8. Escreve agregados em `cohort_db` (sem PII, sem link de volta ao usuario)
+  9. Loga execucao no audit-service
+  ↓
+cohort-analytics-service (3.13) → recomendacoes p/ projection-service e budget-service
+```
+
+**Garantias:**
+- **Gating por consentimento:** revogar o toggle remove o usuario das coortes (cascading delete, 6.2 item k).
+- **k-anonimato (RN-010):** comparacoes/recomendacoes so existem para coortes com >= k membros consentidos.
+- **Privacidade diferencial:** metricas de grupo recebem ruido controlado contra reidentificacao.
+- **Isolamento:** mesmo principio de 6.4 — ambiente de coorte nao acessa databases de producao (IAM + isolamento de rede).
+- **Read-only preservado:** nenhuma etapa escreve no agregador ou em fontes externas (4.4 intacto).
 
 ---
 
@@ -614,6 +659,7 @@ O modulo `PluggySDKGo/GET_ApiKey.go` existente se torna a fundacao do `instituti
 | Versao | Data | Autor | Descricao |
 |--------|------|-------|-----------|
 | 1.0.0 | 09/04/2026 | Leonardo Brandao Maia Filho | Versao inicial do documento de arquitetura |
+| 1.1.0 | 02/06/2026 | Leonardo Brandao Maia Filho | Novo microservico `cohort-analytics-service` (3.13) para segmentacao por classes e benchmarking de pares (opt-in, le somente do bucket anonimizado); categorias e tipos de transacao personalizados em categorization-service (3.6); projecao hibrida baseline + pares em projection-service (3.8); metas flexiveis em budget-service (3.9); toggle de consentimento de benchmarking (6.1); inclusao do cohort-analytics-service no cascading delete (6.2); nova secao 6.6 (Privacidade de Coorte: k-anonimato + privacidade diferencial). Alinhado ao SRS v0.0.005 (RF-012, RNF-013, RN-008..010) |
 
 ---
 

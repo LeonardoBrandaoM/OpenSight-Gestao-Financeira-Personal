@@ -1,6 +1,6 @@
 import { alertas, anomalias, type Alerta } from '../data/mock';
 import { Panel } from '../components/ui';
-import { AnomaliasScatter } from '../components/chartsExtra';
+import { AnomaliasScatter } from '../charts';
 
 const tom: Record<Alerta['severidade'], { cor: string; label: string }> = {
   critico: { cor: '#E5484D', label: 'Crítico' },

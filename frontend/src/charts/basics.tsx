@@ -1,3 +1,5 @@
+// Gráficos básicos do painel: saldo (área), fluxo (barras divergentes),
+// gasto por categoria (barra) e rosca, projeção (3 cenários).
 import {
   Area,
   AreaChart,
@@ -29,23 +31,7 @@ import {
   categorias,
   projecao,
 } from '../data/mock';
-
-// ===== Tooltip escuro padrão =====
-function DarkTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-md border border-graphite bg-obsidian/95 px-3 py-2 shadow-tremor-dropdown">
-      <div className="label-stencil mb-1 text-[0.65rem]">{label}</div>
-      {payload.map((p: any, i: number) => (
-        <div key={i} className="flex items-center gap-2 text-xs">
-          <span className="inline-block h-2 w-2 rounded-full" style={{ background: p.color || p.fill }} />
-          <span className="text-ash">{p.name}</span>
-          <span className="value ml-auto text-bone">{brl(Math.abs(p.value))}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+import { DarkTooltip } from './shared';
 
 // ===== Saldo ao longo do tempo (área) =====
 export function BalanceArea() {
@@ -208,8 +194,10 @@ export function CategoryDonut() {
   );
 }
 
-// ===== Projeção (3 cenários) =====
-export function ProjectionLines() {
+// ===== Projeção (3 cenários + ajuste por pares opcional) =====
+// peerAdjusted: quando true, sobrepõe a linha "Ajustado (pares)" — projeção
+// realista refinada pela trajetória mediana de pares bem-sucedidos (RF-008).
+export function ProjectionLines({ peerAdjusted = false }: { peerAdjusted?: boolean }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
       <LineChart data={projecao} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
@@ -220,6 +208,9 @@ export function ProjectionLines() {
         <Line type="monotone" name="Otimista" dataKey="otimista" stroke={palette.gain} strokeWidth={1.5} strokeDasharray="4 3" dot={false} isAnimationActive={false} />
         <Line type="monotone" name="Realista" dataKey="realista" stroke={palette.ember} strokeWidth={2.5} dot={false} isAnimationActive={false} activeDot={{ r: 4, fill: palette.emberGlow }} />
         <Line type="monotone" name="Pessimista" dataKey="pessimista" stroke={palette.loss} strokeWidth={1.5} strokeDasharray="4 3" dot={false} isAnimationActive={false} />
+        {peerAdjusted && (
+          <Line type="monotone" name="Ajustado (pares)" dataKey="ajustado" stroke={palette.brass} strokeWidth={2} strokeDasharray="6 3" dot={false} isAnimationActive={false} />
+        )}
       </LineChart>
     </ResponsiveContainer>
   );
