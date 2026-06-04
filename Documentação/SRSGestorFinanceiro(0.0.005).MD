@@ -15,6 +15,10 @@
 
 ---
 
+> **Ver também:** [Arquitetura](ArquiteturaOpenSight.md) · [Diagramas](DiagramaArquitetural.md) · [Estrutura de Projeto](EstruturaDeProjeto.md) · [SDK/GetApiKey](SDK/GetApiKey.md). Conector READ-ONLY implementado em `services/institution-connector-service/`.
+
+---
+
 ## 1. INTRODUÇÃO
 
 ### 1.1 Propósito

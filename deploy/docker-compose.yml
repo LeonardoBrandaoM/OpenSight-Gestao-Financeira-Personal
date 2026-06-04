@@ -1,0 +1,30 @@
+# Postgres de desenvolvimento do OpenSight (account_db).
+# Dados persistidos no D: (C: está cheio). As migrations são aplicadas
+# automaticamente na PRIMEIRA inicialização (/docker-entrypoint-initdb.d).
+#
+# Subir:   docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d
+# Derrubar: docker compose -f deploy/docker-compose.yml down   (add -v para apagar dados)
+#
+# IMPORTANTE (C: cheio): no Docker Desktop, aponte o "Disk image location" para o
+# D: (Settings → Resources → Advanced) para que as imagens NÃO vão para o C:.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: opensight-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: account_db
+      POSTGRES_USER: account_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devsecret}
+    ports:
+      - "5432:5432"
+    volumes:
+      # PGDATA no D: (bind mount Windows). Ajuste o caminho se necessário.
+      - "D:\\opensight\\pgdata:/var/lib/postgresql/data"
+      # migrations aplicadas no primeiro init (ordem alfabética):
+      - "../services/account-service/migrations:/docker-entrypoint-initdb.d:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U account_app -d account_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

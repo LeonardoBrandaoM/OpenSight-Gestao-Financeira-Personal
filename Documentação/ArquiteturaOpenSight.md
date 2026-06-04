@@ -10,6 +10,10 @@
 
 ---
 
+> **Ver também:** [Diagramas](DiagramaArquitetural.md) · [SRS](<SRSGestorFinanceiro(0.0.005).MD>) · [Estrutura de Projeto](EstruturaDeProjeto.md) · [SDK/GetApiKey](SDK/GetApiKey.md). Conector READ-ONLY implementado em `services/institution-connector-service/`.
+
+---
+
 ## 1. CONTEXTO E VISAO GERAL
 
 O OpenSight e um sistema SaaS de gestao financeira pessoal que se conecta ao Open Finance brasileiro via Pluggy SDK, operando em modo estritamente **READ-ONLY**. A arquitetura e projetada com principio **security-first** e **defense-in-depth**, atendendo aos requisitos de compliance com:

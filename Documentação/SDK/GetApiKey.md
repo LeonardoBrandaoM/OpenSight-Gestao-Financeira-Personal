@@ -1,5 +1,9 @@
 # SDK Pluggy - Função GetApiKey
 
+> **Status:** migrado. A lógica vive agora em `services/institution-connector-service/internal/connector` (pacote `connector`, método `Client.APIKey(ctx)`), com transporte READ-ONLY. O cache real usa **2h** (TTL do apiKey Pluggy) — este documento descreve a versão original (~28min). Auth via header `X-API-KEY`.
+>
+> **Ver também:** [Arquitetura](../ArquiteturaOpenSight.md) · [SRS](<../SRSGestorFinanceiro(0.0.005).MD>) · [Estrutura de Projeto](../EstruturaDeProjeto.md) · [Diagramas](../DiagramaArquitetural.md).
+
 ## Descrição
 
 Implementação da função `GetApiKey` para o SDK da API Pluggy em Go, com sistema de cache automático e carregamento de credenciais via arquivo `.env`.
