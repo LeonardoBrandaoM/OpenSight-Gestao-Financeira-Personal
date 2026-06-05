@@ -19,7 +19,12 @@ por usuário** e **JWT**.
 | `account-service` | 8081 | API de contas + histórico de saldo; repo memória/Postgres parametrizado | ✅ |
 | `transaction-service` | 8083 | API de transações (modelo canônico); filtro por conta | ✅ |
 | analytics-service | 8084 | Agregações do dashboard (cashflow, por categoria, série de saldo, resumo) | ✅ (memória; precompute→DB futuro) |
-| budget / projection / consent / privacy / notification / audit / cohort | — | demais serviços da arquitetura | ⏳ pendente |
+| budget-service | 8085 | Metas, sugestões automáticas (média 3m −10%), comprometimento de receita | ✅ (memória) |
+| projection-service | 8086 | Cenários de projeção (otimista/realista/pessimista/ajustado) | ✅ (memória) |
+| consent-service | 8087 | Consentimentos de Open Finance (instituições, escopos, status) | ✅ (memória) |
+| cohort-service | 8088 | Benchmarking de coorte (comparativos, drivers, recomendações) | ✅ (memória) |
+| privacy / notification / audit / categorization | — | demais serviços da arquitetura | ⏳ pendente |
+| **packages/httpkit** | — | Lib compartilhada: respostas JSON, middlewares de segurança, JWT/Authn, LoadConfig | ✅ |
 
 **Segurança aplicada nos serviços:** transporte READ-ONLY no conector (5 camadas,
 §4.4); JWT RS256 validado via `Authn` quando `AUTH_PUBLIC_KEY` está setado (senão
@@ -33,7 +38,8 @@ PII; segredos fora do código (`.env` por serviço; produção via Secrets Manag
 - **Autenticação:** tela de Login (login/registro/**modo demo**), JWT em `localStorage`, header `Bearer` automático, guard de rotas, logout.
 - **Integração (live quando o backend está no ar; fallback ao mock):**
   - Contas ✅ · Transações ✅ (com nome amigável da conta) · ContaDetalhe ✅ (conta + transações; histórico via balance-history) · Overview ✅ (patrimônio + últimas transações + cashflow/categorias/série de saldo via analytics).
-- **Ainda mock:** gráficos analíticos de Categorias/Projeções/Benchmarking, páginas de Cartões/Investimentos (dados dedicados).
+  - Orçamento ✅ (budget-service: metas, sugestões, comprometimento) · Projeções ✅ (projection-service) · Privacidade ✅ (consent-service) · Benchmarking ✅ (cohort-service).
+- **Ainda mock:** gráficos analíticos de Categorias, páginas de Cartões/Investimentos (dados dedicados).
 
 ## Como rodar (dev)
 
