@@ -197,10 +197,16 @@ export function CategoryDonut({ data = categorias }: { data?: { nome: string; va
 // ===== Projeção (3 cenários + ajuste por pares opcional) =====
 // peerAdjusted: quando true, sobrepõe a linha "Ajustado (pares)" — projeção
 // realista refinada pela trajetória mediana de pares bem-sucedidos (RF-008).
-export function ProjectionLines({ peerAdjusted = false }: { peerAdjusted?: boolean }) {
+export function ProjectionLines({
+  peerAdjusted = false,
+  data = projecao,
+}: {
+  peerAdjusted?: boolean;
+  data?: { mes: string; otimista: number; realista: number; pessimista: number; ajustado: number }[];
+}) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <LineChart data={projecao} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+      <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="mes" {...axisStyle} />
         <YAxis tickFormatter={brlCompact} width={64} {...axisStyle} />

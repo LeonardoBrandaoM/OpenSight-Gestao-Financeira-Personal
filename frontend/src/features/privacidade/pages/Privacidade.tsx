@@ -1,6 +1,7 @@
-import { consentimentos, type Consentimento } from '@/data/mock';
+import { type Consentimento } from '@/data/mock';
 import { Panel } from '@/shared/ui';
 import { useConsent, type ConsentState } from '@/shared/context/consent';
+import { useConsentimentos } from '../useConsentimentos';
 
 const statusTom: Record<Consentimento['status'], { cor: string; label: string }> = {
   ativo: { cor: '#2FA572', label: 'Ativo' },
@@ -38,6 +39,7 @@ const togglesPlataforma: { chave: keyof ConsentState; titulo: string; desc: stri
 
 export function Privacidade() {
   const consent = useConsent();
+  const { consentimentos } = useConsentimentos();
   return (
     <div className="space-y-4 p-6">
       {/* Banner READ-ONLY */}

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { cohort } from '@/data/mock';
 import { Panel } from '@/shared/ui';
 import { useConsent } from '@/shared/context/consent';
+import { useCohort } from '../useCohort';
 
-const trajetoriaTom: Record<typeof cohort.trajetoria, { cor: string; label: string }> = {
+const trajetoriaTom: Record<'melhorou' | 'estavel' | 'decaiu', { cor: string; label: string }> = {
   melhorou: { cor: '#2FA572', label: 'Melhorou' },
   estavel: { cor: '#E8A317', label: 'Estável' },
   decaiu: { cor: '#E5484D', label: 'Decaiu' },
@@ -65,6 +65,7 @@ function CompareRow({
 
 export function Benchmarking() {
   const { benchmarking, set } = useConsent();
+  const { cohort } = useCohort();
 
   // Gate: sem consentimento, mostra a explicação e o opt-in.
   if (!benchmarking) {

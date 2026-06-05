@@ -12,6 +12,10 @@ export const services = {
   accounts: clean(env.VITE_ACCOUNTS_URL ?? env.VITE_API_URL ?? 'http://localhost:8081'),
   transactions: clean(env.VITE_TRANSACTIONS_URL ?? 'http://localhost:8083'),
   analytics: clean(env.VITE_ANALYTICS_URL ?? 'http://localhost:8084'),
+  budget: clean(env.VITE_BUDGET_URL ?? 'http://localhost:8085'),
+  projection: clean(env.VITE_PROJECTION_URL ?? 'http://localhost:8086'),
+  consent: clean(env.VITE_CONSENT_URL ?? 'http://localhost:8087'),
+  cohort: clean(env.VITE_COHORT_URL ?? 'http://localhost:8088'),
 };
 
 export class ApiError extends Error {

@@ -1,15 +1,10 @@
-import { useMemo, useState } from 'react';
-import {
-  budgets,
-  comprometimento,
-  sugestoesOrcamento,
-  sugerirMeta,
-  gastoPorCategoria,
-  categoriasCadastro,
-} from '@/data/mock';
+import { useEffect, useMemo, useState } from 'react';
+import { sugerirMeta, categoriasCadastro } from '@/data/mock';
 import { Panel, DeltaChip } from '@/shared/ui';
 import { GaugeComprometimento } from '@/shared/charts';
 import { brl } from '@/shared/theme/tokens';
+import { useBudget } from '../useBudget';
+import type { SugestaoOrcamento } from '../data';
 
 type Modo = 'manual' | 'auto';
 
@@ -50,7 +45,6 @@ function MiniStat({ label, value, tone = 'bone' }: { label: string; value: strin
   );
 }
 
-// Segmentação entre os dois modos de orçamento.
 function ModeToggle({ modo, setModo }: { modo: Modo; setModo: (m: Modo) => void }) {
   const opts: { id: Modo; label: string; sub: string }[] = [
     { id: 'manual', label: 'Orçamento manual', sub: 'Defina as metas por categoria' },
@@ -91,7 +85,6 @@ function corBarra(pct: number): string {
   return 'bg-gain';
 }
 
-// Seletor para adicionar uma meta a qualquer categoria ainda sem orçamento.
 function AddMeta({ disponiveis, onAdd }: { disponiveis: string[]; onAdd: (cat: string) => void }) {
   const [sel, setSel] = useState('');
   if (disponiveis.length === 0) {
@@ -126,7 +119,6 @@ function AddMeta({ disponiveis, onAdd }: { disponiveis: string[]; onAdd: (cat: s
 }
 
 // Editor manual: ajusta a meta de cada categoria com feedback de progresso.
-// `fator` converte a meta mensal base para o horizonte selecionado.
 function ManualEditor({
   metas,
   setMeta,
@@ -134,6 +126,7 @@ function ManualEditor({
   addMeta,
   disponiveis,
   fator,
+  gastoPorCategoria,
 }: {
   metas: Record<string, number>;
   setMeta: (cat: string, valor: number) => void;
@@ -141,6 +134,7 @@ function ManualEditor({
   addMeta: (cat: string) => void;
   disponiveis: string[];
   fator: number;
+  gastoPorCategoria: Record<string, number>;
 }) {
   const cats = Object.keys(metas);
   return (
@@ -152,9 +146,9 @@ function ManualEditor({
       ) : (
         cats.map((cat) => {
           const metaBase = metas[cat];
-          const meta = metaBase * fator; // valor exibido no horizonte atual
+          const meta = metaBase * fator;
           const gasto = (gastoPorCategoria[cat] ?? 0) * fator;
-          const pct = metaBase > 0 ? Math.round((gastoPorCategoria[cat] ?? 0) / metaBase * 100) : 0;
+          const pct = metaBase > 0 ? Math.round(((gastoPorCategoria[cat] ?? 0) / metaBase) * 100) : 0;
           return (
             <div key={cat}>
               <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
@@ -202,17 +196,18 @@ function ManualEditor({
   );
 }
 
-// Sugestões automáticas: cada linha pode ser aplicada como meta manual.
 function AutoSuggestions({
   metas,
+  sugestoes,
   aplicar,
   aplicarTodas,
 }: {
   metas: Record<string, number>;
+  sugestoes: SugestaoOrcamento[];
   aplicar: (cat: string, valor: number) => void;
   aplicarTodas: () => void;
 }) {
-  const pendentes = sugestoesOrcamento.filter((s) => metas[s.categoria] !== sugerirMeta(s.media3m)).length;
+  const pendentes = sugestoes.filter((s) => metas[s.categoria] !== sugerirMeta(s.media3m)).length;
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -230,7 +225,7 @@ function AutoSuggestions({
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {sugestoesOrcamento.map((s) => {
+        {sugestoes.map((s) => {
           const sugerido = sugerirMeta(s.media3m);
           const aplicada = metas[s.categoria] === sugerido;
           return (
@@ -281,11 +276,17 @@ function AutoSuggestions({
 }
 
 export function Orcamento() {
+  const { data: budget } = useBudget();
+  const { metas: budgetMetas, sugestoes, gastoPorCategoria, comprometimento } = budget;
+
   const [modo, setModo] = useState<Modo>('manual');
   const [horizonte, setHorizonte] = useState<Horizonte>('mensal');
-  const [metas, setMetas] = useState<Record<string, number>>(() =>
-    Object.fromEntries(budgets.map((b) => [b.categoria, b.meta])),
-  );
+  const [metas, setMetas] = useState<Record<string, number>>({});
+
+  // Inicializa/atualiza as metas quando o orçamento carrega do serviço.
+  useEffect(() => {
+    setMetas(Object.fromEntries(budgetMetas.map((b) => [b.categoria, b.meta])));
+  }, [budgetMetas]);
 
   const fator = HORIZONTES.find((h) => h.id === horizonte)!.fator;
 
@@ -296,7 +297,6 @@ export function Orcamento() {
       delete next[cat];
       return next;
     });
-  // Adiciona meta a qualquer categoria, com valor inicial ~ gasto do mês.
   const addMeta = (cat: string) => {
     const base = gastoPorCategoria[cat] ?? 0;
     setMeta(cat, Math.max(100, Math.round((base || 100) / 10) * 10));
@@ -304,7 +304,7 @@ export function Orcamento() {
   const aplicarTodas = () =>
     setMetas((m) => {
       const next = { ...m };
-      for (const s of sugestoesOrcamento) next[s.categoria] = sugerirMeta(s.media3m);
+      for (const s of sugestoes) next[s.categoria] = sugerirMeta(s.media3m);
       return next;
     });
 
@@ -318,7 +318,7 @@ export function Orcamento() {
     const gasto = cats.reduce((s, c) => s + (gastoPorCategoria[c] ?? 0), 0);
     const meta = cats.reduce((s, c) => s + metas[c], 0);
     return { totalGasto: gasto, totalMeta: meta, restante: meta - gasto };
-  }, [metas]);
+  }, [metas, gastoPorCategoria]);
 
   const periodoLabel = HORIZONTES.find((h) => h.id === horizonte)!.label.toLowerCase();
 
@@ -359,11 +359,12 @@ export function Orcamento() {
             addMeta={addMeta}
             disponiveis={disponiveis}
             fator={fator}
+            gastoPorCategoria={gastoPorCategoria}
           />
         </Panel>
       ) : (
         <Panel title="Sugestões de orçamento" note="média 3 meses − 10%">
-          <AutoSuggestions metas={metas} aplicar={setMeta} aplicarTodas={aplicarTodas} />
+          <AutoSuggestions metas={metas} sugestoes={sugestoes} aplicar={setMeta} aplicarTodas={aplicarTodas} />
         </Panel>
       )}
 

@@ -7,6 +7,10 @@ interface ImportMetaEnv {
   readonly VITE_AUTH_URL?: string;
   readonly VITE_TRANSACTIONS_URL?: string;
   readonly VITE_ANALYTICS_URL?: string;
+  readonly VITE_BUDGET_URL?: string;
+  readonly VITE_PROJECTION_URL?: string;
+  readonly VITE_CONSENT_URL?: string;
+  readonly VITE_COHORT_URL?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;
