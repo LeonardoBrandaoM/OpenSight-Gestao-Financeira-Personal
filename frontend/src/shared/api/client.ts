@@ -16,6 +16,8 @@ export const services = {
   projection: clean(env.VITE_PROJECTION_URL ?? 'http://localhost:8086'),
   consent: clean(env.VITE_CONSENT_URL ?? 'http://localhost:8087'),
   cohort: clean(env.VITE_COHORT_URL ?? 'http://localhost:8088'),
+  cards: clean(env.VITE_CARDS_URL ?? 'http://localhost:8089'),
+  investments: clean(env.VITE_INVESTMENTS_URL ?? 'http://localhost:8090'),
 };
 
 export class ApiError extends Error {

@@ -1,7 +1,7 @@
-import { cartaoResumo, faturaHistorico, cartaoPorCategoria, cartaoLancamentos } from '@/data/mock';
 import { Panel } from '@/shared/ui';
 import { FaturaHistoricoBar, CartaoCategoriaDonut } from '@/features/cartoes/charts/cartoes';
 import { brl } from '@/shared/theme/tokens';
+import { useCartoes } from '../useCartoes';
 
 function MiniStat({ label, value, tone = 'bone' }: { label: string; value: string; tone?: string }) {
   return (
@@ -19,6 +19,8 @@ function utilCor(pct: number): string {
 }
 
 export function Cartoes() {
+  const { data } = useCartoes();
+  const { resumo: cartaoResumo, faturaHistorico, porCategoria: cartaoPorCategoria, lancamentos: cartaoLancamentos } = data;
   const { limiteTotal, faturaAtual, vencimento, fechamento, melhorDiaCompra } = cartaoResumo;
   const disponivel = Math.max(limiteTotal - faturaAtual, 0);
   const util = limiteTotal > 0 ? (faturaAtual / limiteTotal) * 100 : 0;
