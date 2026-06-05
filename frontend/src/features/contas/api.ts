@@ -38,3 +38,21 @@ export async function fetchContas(signal?: AbortSignal): Promise<Conta[]> {
   const data = await apiGet<AccountsResponse>(services.accounts, '/api/v1/accounts', { signal });
   return data.results.map(toConta);
 }
+
+export interface PontoSaldo {
+  mes: string;
+  saldo: number;
+}
+interface BalanceHistoryResponse {
+  results: PontoSaldo[];
+}
+
+// Histórico de saldo de uma conta (GET /api/v1/accounts/{id}/balance-history).
+export async function fetchBalanceHistory(accountId: string, signal?: AbortSignal): Promise<PontoSaldo[]> {
+  const data = await apiGet<BalanceHistoryResponse>(
+    services.accounts,
+    `/api/v1/accounts/${encodeURIComponent(accountId)}/balance-history`,
+    { signal },
+  );
+  return data.results;
+}

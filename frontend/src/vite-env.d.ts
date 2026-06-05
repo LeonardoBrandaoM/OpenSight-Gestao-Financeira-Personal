@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_ACCOUNTS_URL?: string;
   readonly VITE_AUTH_URL?: string;
   readonly VITE_TRANSACTIONS_URL?: string;
+  readonly VITE_ANALYTICS_URL?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;

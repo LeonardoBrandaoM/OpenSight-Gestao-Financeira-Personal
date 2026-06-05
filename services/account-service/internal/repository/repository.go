@@ -13,4 +13,5 @@ import (
 type AccountRepository interface {
 	List(ctx context.Context, userID string) ([]domain.Account, error)
 	Get(ctx context.Context, userID, id string) (domain.Account, error)
+	BalanceHistory(ctx context.Context, userID, accountID string) ([]domain.BalancePoint, error)
 }

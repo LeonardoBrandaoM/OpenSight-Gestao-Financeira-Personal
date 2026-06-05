@@ -35,6 +35,12 @@ type Account struct {
 	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
+// BalancePoint é um ponto do histórico de saldo (saldo em reais).
+type BalancePoint struct {
+	Mes   string  `json:"mes"`
+	Saldo float64 `json:"saldo"`
+}
+
 // Validate garante invariantes mínimas antes de persistir/retornar.
 func (a Account) Validate() error {
 	if a.UserID == "" {

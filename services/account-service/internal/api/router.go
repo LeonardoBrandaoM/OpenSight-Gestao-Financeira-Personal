@@ -19,6 +19,7 @@ func NewRouter(repo repository.AccountRepository, cfg config.Config, authPub *rs
 	mux.HandleFunc("GET /healthz", h.health)
 	mux.HandleFunc("GET /api/v1/accounts", h.listAccounts)
 	mux.HandleFunc("GET /api/v1/accounts/{id}", h.getAccount)
+	mux.HandleFunc("GET /api/v1/accounts/{id}/balance-history", h.getBalanceHistory)
 
 	// Ordem: recover (mais externo) → log → security headers → CORS → auth → mux.
 	return httpx.Chain(mux,

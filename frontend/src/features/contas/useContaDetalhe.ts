@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useContas } from './useContas';
+import { fetchBalanceHistory } from './api';
 import { getContaDetalhe, type ContaDetalheData } from './data';
 import { fetchTransacoesByAccount } from '@/features/transacoes/api';
 import type { Transacao } from '@/features/transacoes/data';
@@ -45,14 +46,17 @@ export function useContaDetalhe(index: number): ContaDetalheState {
     }
 
     const ctrl = new AbortController();
-    fetchTransacoesByAccount(accountId, ctrl.signal)
-      .then((txs) => {
+    Promise.all([
+      fetchTransacoesByAccount(accountId, ctrl.signal),
+      fetchBalanceHistory(accountId, ctrl.signal).catch(() => [] as { mes: string; saldo: number }[]),
+    ])
+      .then(([txs, historico]) => {
         const entradas = txs.filter((t) => t.valor > 0).reduce((s, t) => s + t.valor, 0);
         const saidas = txs.filter((t) => t.valor < 0).reduce((s, t) => s + t.valor, 0);
         setState({
           data: {
             conta,
-            historico: mock?.historico ?? [],
+            historico: historico.length ? historico : (mock?.historico ?? []),
             transacoes: txs,
             porCategoria: porCategoriaDe(txs),
             entradas,

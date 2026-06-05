@@ -56,3 +56,24 @@ func (r *PostgresRepo) Get(ctx context.Context, userID, id string) (domain.Accou
 	}
 	return a, err
 }
+
+func (r *PostgresRepo) BalanceHistory(ctx context.Context, userID, accountID string) ([]domain.BalancePoint, error) {
+	rows, err := r.db.QueryContext(ctx,
+		`SELECT mes, saldo_cents FROM balance_history WHERE user_id = $1 AND account_id = $2 ORDER BY seq`,
+		userID, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := make([]domain.BalancePoint, 0)
+	for rows.Next() {
+		var mes string
+		var cents int64
+		if err := rows.Scan(&mes, &cents); err != nil {
+			return nil, err
+		}
+		out = append(out, domain.BalancePoint{Mes: mes, Saldo: float64(cents) / 100})
+	}
+	return out, rows.Err()
+}

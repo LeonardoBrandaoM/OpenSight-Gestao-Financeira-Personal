@@ -11,6 +11,7 @@ export const services = {
   auth: clean(env.VITE_AUTH_URL ?? 'http://localhost:8082'),
   accounts: clean(env.VITE_ACCOUNTS_URL ?? env.VITE_API_URL ?? 'http://localhost:8081'),
   transactions: clean(env.VITE_TRANSACTIONS_URL ?? 'http://localhost:8083'),
+  analytics: clean(env.VITE_ANALYTICS_URL ?? 'http://localhost:8084'),
 };
 
 export class ApiError extends Error {

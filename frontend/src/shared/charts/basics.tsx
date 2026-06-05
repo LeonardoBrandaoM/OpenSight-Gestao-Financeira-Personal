@@ -34,10 +34,10 @@ import {
 import { DarkTooltip } from './shared';
 
 // ===== Saldo ao longo do tempo (área) =====
-export function BalanceArea() {
+export function BalanceArea({ data = balanceSeries }: { data?: { mes: string; saldo: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <AreaChart data={balanceSeries} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+      <AreaChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <defs>
           <linearGradient id="fillSaldo" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={palette.ember} stopOpacity={0.35} />
@@ -64,10 +64,10 @@ export function BalanceArea() {
 }
 
 // ===== Entrada × saída (barras divergentes) =====
-export function CashflowBars() {
+export function CashflowBars({ data = cashflow }: { data?: { mes: string; receita: number; despesa: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={cashflow} stackOffset="sign" margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+      <BarChart data={data} stackOffset="sign" margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="mes" {...axisStyle} />
         <YAxis tickFormatter={brlCompact} width={64} {...axisStyle} />
@@ -81,8 +81,8 @@ export function CashflowBars() {
 }
 
 // ===== Gasto por categoria (barra horizontal) =====
-export function CategoryBar() {
-  const data = [...categorias].sort((a, b) => b.valor - a.valor);
+export function CategoryBar({ data: input = categorias }: { data?: { nome: string; valor: number }[] }) {
+  const data = [...input].sort((a, b) => b.valor - a.valor);
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart layout="vertical" data={data} margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
@@ -154,8 +154,8 @@ function PercentLabel({ cx, cy, midAngle, outerRadius, percent, fill, payload }:
   );
 }
 
-export function CategoryDonut() {
-  const dados = categorias.map((c, i) => ({ ...c, fill: chartColors[i % chartColors.length] }));
+export function CategoryDonut({ data = categorias }: { data?: { nome: string; valor: number }[] }) {
+  const dados = data.map((c, i) => ({ ...c, fill: chartColors[i % chartColors.length] }));
   return (
     <div>
       <ResponsiveContainer width="100%" height={220}>
