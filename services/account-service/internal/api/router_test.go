@@ -11,7 +11,8 @@ import (
 )
 
 func testServer() http.Handler {
-	return NewRouter(repository.NewMemoryRepo(), config.Config{CORSOrigins: []string{"http://localhost:5173"}})
+	// authPub nil = modo dev (sem JWT); os testes exercitam o fallback de usuário.
+	return NewRouter(repository.NewMemoryRepo(), config.Config{CORSOrigins: []string{"http://localhost:5173"}}, nil)
 }
 
 func TestHealth(t *testing.T) {

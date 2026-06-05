@@ -1,6 +1,6 @@
 // Integração da feature Contas com o account-service (GET /api/v1/accounts).
 // Mapeia o DTO da API (modelo canônico, centavos) para o `Conta` da UI.
-import { apiGet } from '@/shared/api/client';
+import { apiGet, services } from '@/shared/api/client';
 import type { Conta } from './data';
 
 interface AccountDTO {
@@ -34,6 +34,6 @@ function toConta(a: AccountDTO): Conta {
 }
 
 export async function fetchContas(signal?: AbortSignal): Promise<Conta[]> {
-  const data = await apiGet<AccountsResponse>('/api/v1/accounts', { signal });
+  const data = await apiGet<AccountsResponse>(services.accounts, '/api/v1/accounts', { signal });
   return data.results.map(toConta);
 }

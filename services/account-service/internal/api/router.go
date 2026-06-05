@@ -1,6 +1,7 @@
 package api
 
 import (
+	"crypto/rsa"
 	"net/http"
 
 	"opensight/services/account-service/internal/config"
@@ -10,7 +11,8 @@ import (
 
 // NewRouter monta o roteador com a cadeia de middlewares de segurança.
 // Frontend → ESTA API → repositório → DB. O navegador nunca toca no banco.
-func NewRouter(repo repository.AccountRepository, cfg config.Config) http.Handler {
+// `authPub` é a chave pública do auth-service (nil = autenticação em modo dev).
+func NewRouter(repo repository.AccountRepository, cfg config.Config, authPub *rsa.PublicKey) http.Handler {
 	h := NewHandlers(repo)
 
 	mux := http.NewServeMux()
@@ -24,6 +26,6 @@ func NewRouter(repo repository.AccountRepository, cfg config.Config) http.Handle
 		httpx.RequestLogger,
 		httpx.SecurityHeaders,
 		httpx.CORS(cfg.CORSOrigins),
-		WithUser,
+		Authn(authPub, cfg.AuthIssuer),
 	)
 }
