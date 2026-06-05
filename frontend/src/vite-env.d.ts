@@ -13,6 +13,9 @@ interface ImportMetaEnv {
   readonly VITE_COHORT_URL?: string;
   readonly VITE_CARDS_URL?: string;
   readonly VITE_INVESTMENTS_URL?: string;
+  readonly VITE_CATEGORIZATION_URL?: string;
+  readonly VITE_PRIVACY_URL?: string;
+  readonly VITE_NOTIFICATION_URL?: string;
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv;

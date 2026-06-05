@@ -18,6 +18,9 @@ export const services = {
   cohort: clean(env.VITE_COHORT_URL ?? 'http://localhost:8088'),
   cards: clean(env.VITE_CARDS_URL ?? 'http://localhost:8089'),
   investments: clean(env.VITE_INVESTMENTS_URL ?? 'http://localhost:8090'),
+  categorization: clean(env.VITE_CATEGORIZATION_URL ?? 'http://localhost:8091'),
+  privacy: clean(env.VITE_PRIVACY_URL ?? 'http://localhost:8092'),
+  notification: clean(env.VITE_NOTIFICATION_URL ?? 'http://localhost:8093'),
 };
 
 export class ApiError extends Error {

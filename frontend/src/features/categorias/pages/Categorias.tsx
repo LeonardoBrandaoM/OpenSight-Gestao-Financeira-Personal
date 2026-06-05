@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import {
-  categorias,
-  categoriasCadastro,
   paletaCategoria,
-  tiposTransacao,
   type CategoriaCadastro,
   type EfeitoFluxo,
   type TipoCategoria,
   type TipoTransacao,
 } from '@/data/mock';
+import { useCategorias } from '../useCategorias';
 import { Panel } from '@/shared/ui';
 import {
   BolhasScatter,
@@ -31,9 +29,9 @@ const tiposCategoria: TipoCategoria[] = ['despesa', 'receita', 'transferencia'];
 const efeitos: EfeitoFluxo[] = ['sai', 'entra', 'neutro'];
 
 // Gestão de categorias e tipos de transação personalizados (RF-004).
-function GerenciarCategorias() {
-  const [cats, setCats] = useState<CategoriaCadastro[]>(categoriasCadastro);
-  const [tipos, setTipos] = useState<TipoTransacao[]>(tiposTransacao);
+function GerenciarCategorias({ cadastro, tiposIniciais }: { cadastro: CategoriaCadastro[]; tiposIniciais: TipoTransacao[] }) {
+  const [cats, setCats] = useState<CategoriaCadastro[]>(cadastro);
+  const [tipos, setTipos] = useState<TipoTransacao[]>(tiposIniciais);
 
   const [nome, setNome] = useState('');
   const [tipoCat, setTipoCat] = useState<TipoCategoria>('despesa');
@@ -181,19 +179,21 @@ function GerenciarCategorias() {
 }
 
 export function Categorias() {
-  const total = categorias.reduce((s, c) => s + c.valor, 0);
-  const ordenadas = [...categorias].sort((a, b) => b.valor - a.valor);
+  const { data } = useCategorias();
+  const { breakdown, cadastro, tipos } = data;
+  const total = breakdown.reduce((s, c) => s + c.valor, 0);
+  const ordenadas = [...breakdown].sort((a, b) => b.valor - a.valor);
 
   return (
     <div className="space-y-4 p-6">
-      <GerenciarCategorias />
+      <GerenciarCategorias cadastro={cadastro} tiposIniciais={tipos} />
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Distribuição por categoria" note="maio">
-          <CategoryDonut />
+          <CategoryDonut data={breakdown} />
         </Panel>
         <Panel title="Gasto por categoria" note="maio">
-          <CategoryBar />
+          <CategoryBar data={breakdown} />
         </Panel>
       </section>
 

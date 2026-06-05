@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { type Consentimento } from '@/data/mock';
 import { Panel } from '@/shared/ui';
 import { useConsent, type ConsentState } from '@/shared/context/consent';
 import { useConsentimentos } from '../useConsentimentos';
+import { solicitarDireito, type TipoSolicitacao } from '../api';
 
 const statusTom: Record<Consentimento['status'], { cor: string; label: string }> = {
   ativo: { cor: '#2FA572', label: 'Ativo' },
@@ -40,6 +42,26 @@ const togglesPlataforma: { chave: keyof ConsentState; titulo: string; desc: stri
 export function Privacidade() {
   const consent = useConsent();
   const { consentimentos } = useConsentimentos();
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState<TipoSolicitacao | null>(null);
+
+  const pedir = async (tipo: TipoSolicitacao) => {
+    setEnviando(tipo);
+    setFeedback(null);
+    try {
+      await solicitarDireito(tipo);
+      setFeedback(
+        tipo === 'export'
+          ? 'Solicitação de exportação registrada — você receberá os dados por email em até 72 h.'
+          : 'Solicitação de exclusão registrada — processada em cascata em até 72 h.',
+      );
+    } catch {
+      setFeedback('Não foi possível registrar a solicitação agora. Tente novamente mais tarde.');
+    } finally {
+      setEnviando(null);
+    }
+  };
+
   return (
     <div className="space-y-4 p-6">
       {/* Banner READ-ONLY */}
@@ -157,13 +179,24 @@ export function Privacidade() {
 
       <Panel title="Seus direitos (LGPD)">
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button className="rounded-md border border-graphite bg-obsidian px-4 py-2 text-sm text-bone transition-colors hover:border-brass hover:text-brass">
-            Exportar meus dados (JSON + CSV)
+          <button
+            type="button"
+            onClick={() => pedir('export')}
+            disabled={enviando !== null}
+            className="rounded-md border border-graphite bg-obsidian px-4 py-2 text-sm text-bone transition-colors hover:border-brass hover:text-brass disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {enviando === 'export' ? 'Registrando…' : 'Exportar meus dados (JSON + CSV)'}
           </button>
-          <button className="rounded-md border border-loss/50 bg-loss/10 px-4 py-2 text-sm text-loss transition-colors hover:bg-loss/20">
-            Excluir minha conta
+          <button
+            type="button"
+            onClick={() => pedir('delete')}
+            disabled={enviando !== null}
+            className="rounded-md border border-loss/50 bg-loss/10 px-4 py-2 text-sm text-loss transition-colors hover:bg-loss/20 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {enviando === 'delete' ? 'Registrando…' : 'Excluir minha conta'}
           </button>
         </div>
+        {feedback && <p className="mt-3 rounded border border-brass/40 bg-brass/10 p-2.5 text-xs text-bone">{feedback}</p>}
         <p className="mt-3 text-xs text-ash">
           A exclusão é em cascata por todos os serviços (SLA de 72 h) e exige reautenticação. Um registro
           anonimizado é retido por 5 anos para auditoria, sem PII.

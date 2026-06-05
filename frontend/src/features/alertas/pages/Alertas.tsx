@@ -1,6 +1,7 @@
-import { alertas, anomalias, type Alerta } from '@/data/mock';
+import { anomalias, type Alerta } from '@/data/mock';
 import { Panel } from '@/shared/ui';
 import { AnomaliasScatter } from '@/shared/charts';
+import { useAlertas } from '../useAlertas';
 
 const tom: Record<Alerta['severidade'], { cor: string; label: string }> = {
   critico: { cor: '#E5484D', label: 'Crítico' },
@@ -9,6 +10,7 @@ const tom: Record<Alerta['severidade'], { cor: string; label: string }> = {
 };
 
 export function Alertas() {
+  const { alertas } = useAlertas();
   const totalAnomalias = anomalias.filter((a) => a.anomalia).length;
   return (
     <div className="space-y-4 p-6">
