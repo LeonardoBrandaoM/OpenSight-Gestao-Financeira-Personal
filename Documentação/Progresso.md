@@ -25,7 +25,10 @@ por usuário** e **JWT**.
 | cohort-service | 8088 | Benchmarking de coorte (comparativos, drivers, recomendações) | ✅ (memória) |
 | cards-service | 8089 | Cartões de crédito (resumo, faturas, gastos por categoria, lançamentos) | ✅ (memória) |
 | investments-service | 8090 | Carteira (resumo, alocação, evolução, rentabilidade por classe, posições) | ✅ (memória) |
-| privacy / notification / audit / categorization | — | demais serviços da arquitetura | ⏳ pendente |
+| categorization-service | 8091 | Categorias + tipos de transação (RF-004) e breakdown por categoria | ✅ (memória) |
+| privacy-service | 8092 | Direitos do titular LGPD (portabilidade/eliminação); repo concorrente | ✅ (memória) |
+| notification-service | 8093 | Feed consolidado de alertas (anomalia/orçamento/consentimento) | ✅ (memória) |
+| audit-service | 8094 | Trilha de auditoria append-only imutável (backend-only) | ✅ (memória; com teste) |
 | **packages/httpkit** | — | Lib compartilhada: respostas JSON, middlewares de segurança, JWT/Authn, LoadConfig | ✅ |
 
 **Segurança aplicada nos serviços:** transporte READ-ONLY no conector (5 camadas,
@@ -42,7 +45,8 @@ PII; segredos fora do código (`.env` por serviço; produção via Secrets Manag
   - Contas ✅ · Transações ✅ (com nome amigável da conta) · ContaDetalhe ✅ (conta + transações; histórico via balance-history) · Overview ✅ (patrimônio + últimas transações + cashflow/categorias/série de saldo via analytics).
   - Orçamento ✅ (budget-service: metas, sugestões, comprometimento) · Projeções ✅ (projection-service) · Privacidade ✅ (consent-service) · Benchmarking ✅ (cohort-service).
   - Cartões ✅ (cards-service) · Investimentos ✅ (investments-service).
-- **Ainda mock:** gráficos analíticos de Categorias (dados dedicados).
+  - Categorias ✅ (categorization-service: breakdown + cadastro + tipos) · Alertas ✅ (notification-service) · Direitos LGPD ✅ (privacy-service: botões Exportar/Excluir).
+- **Ainda mock:** gráficos estatísticos avançados (treemap/sunburst/heatmap/bolhas/radar/box em Categorias, scatter de anomalias em Alertas) — são **analytics** e ficam para o precompute do analytics-service.
 
 ## Como rodar (dev)
 
