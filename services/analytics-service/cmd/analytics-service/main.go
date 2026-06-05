@@ -15,6 +15,7 @@ import (
 
 	"opensight/services/analytics-service/internal/api"
 	"opensight/services/analytics-service/internal/config"
+	"opensight/services/analytics-service/internal/platform"
 	"opensight/services/analytics-service/internal/repository"
 	"opensight/services/analytics-service/internal/token"
 )
@@ -35,8 +36,21 @@ func main() {
 		log.Println("autenticação: modo dev (sem JWT)")
 	}
 
-	repo := repository.NewMemoryRepo()
-	log.Println("repositório: memória (seed) — precompute para analytics_db é o próximo passo")
+	// Postgres (read-models precomputados) se DATABASE_URL estiver definido;
+	// senão, memória (seed) — o job de precompute materializa em analytics_db.
+	var repo repository.AnalyticsRepository
+	if cfg.DatabaseURL != "" {
+		db, err := platform.OpenDB(context.Background(), cfg.DatabaseURL)
+		if err != nil {
+			log.Fatalf("falha ao conectar no Postgres: %v", err)
+		}
+		defer db.Close()
+		repo = repository.NewPostgresRepo(db)
+		log.Println("repositório: Postgres (read-models)")
+	} else {
+		repo = repository.NewMemoryRepo()
+		log.Println("repositório: memória (seed) — defina DATABASE_URL para Postgres")
+	}
 
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,

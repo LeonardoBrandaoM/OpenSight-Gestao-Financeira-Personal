@@ -33,9 +33,24 @@ func main() {
 		log.Println("autenticação: modo dev (sem JWT)")
 	}
 
+	// Postgres se DATABASE_URL estiver definido; senão, memória (dev).
+	var repo repository.InvestmentRepository
+	if cfg.DatabaseURL != "" {
+		db, err := httpkit.OpenDB(context.Background(), cfg.DatabaseURL)
+		if err != nil {
+			log.Fatalf("falha ao conectar no Postgres: %v", err)
+		}
+		defer db.Close()
+		repo = repository.NewPostgresRepo(db)
+		log.Println("repositório: Postgres")
+	} else {
+		repo = repository.NewMemoryRepo()
+		log.Println("repositório: memória (dev) — defina DATABASE_URL para Postgres")
+	}
+
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           api.NewRouter(repository.NewMemoryRepo(), cfg, authPub),
+		Handler:           api.NewRouter(repo, cfg, authPub),
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       cfg.ReadTimeout,
 		WriteTimeout:      cfg.WriteTimeout,

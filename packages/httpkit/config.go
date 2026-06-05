@@ -14,6 +14,7 @@ type Config struct {
 	CORSOrigins      []string
 	AuthPublicKeyPEM string // chave pública do auth-service; vazio = modo dev
 	AuthIssuer       string
+	DatabaseURL      string // vazio = repositório em memória (dev)
 	ReadTimeout      time.Duration
 	WriteTimeout     time.Duration
 }
@@ -26,6 +27,7 @@ func LoadConfig(defaultPort string) Config {
 		CORSOrigins:      splitCSV(getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5174")),
 		AuthPublicKeyPEM: loadAuthKey(),
 		AuthIssuer:       getenv("JWT_ISSUER", "opensight-auth"),
+		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		ReadTimeout:      10 * time.Second,
 		WriteTimeout:     15 * time.Second,
 	}
