@@ -18,17 +18,17 @@ por usuário** e **JWT**.
 | `auth-service` | 8082 | Cadastro/login + **JWT RS256** (bcrypt 12, política de senha, `/me`, `/public-key`) | ✅ |
 | `account-service` | 8081 | API de contas + histórico de saldo; repo memória/Postgres parametrizado | ✅ |
 | `transaction-service` | 8083 | API de transações (modelo canônico); filtro por conta | ✅ |
-| analytics-service | 8084 | Agregações do dashboard (cashflow, por categoria, série de saldo, resumo) | ✅ (memória; precompute→DB futuro) |
-| budget-service | 8085 | Metas, sugestões automáticas (média 3m −10%), comprometimento de receita | ✅ (memória) |
-| projection-service | 8086 | Cenários de projeção (otimista/realista/pessimista/ajustado) | ✅ (memória) |
-| consent-service | 8087 | Consentimentos de Open Finance (instituições, escopos, status) | ✅ (memória) |
-| cohort-service | 8088 | Benchmarking de coorte (comparativos, drivers, recomendações) | ✅ (memória) |
-| cards-service | 8089 | Cartões de crédito (resumo, faturas, gastos por categoria, lançamentos) | ✅ (memória) |
-| investments-service | 8090 | Carteira (resumo, alocação, evolução, rentabilidade por classe, posições) | ✅ (memória) |
-| categorization-service | 8091 | Categorias + tipos de transação (RF-004) e breakdown por categoria | ✅ (memória) |
-| privacy-service | 8092 | Direitos do titular LGPD (portabilidade/eliminação); repo concorrente | ✅ (memória) |
-| notification-service | 8093 | Feed consolidado de alertas (anomalia/orçamento/consentimento) | ✅ (memória) |
-| audit-service | 8094 | Trilha de auditoria append-only imutável (backend-only) | ✅ (memória; com teste) |
+| analytics-service | 8084 | Overview + insights de categorias + anomalias (gráficos avançados) | ✅ memória/**Postgres** (read-model CQRS) |
+| budget-service | 8085 | Metas, sugestões automáticas (média 3m −10%), comprometimento de receita | ✅ memória/**Postgres** |
+| projection-service | 8086 | Cenários de projeção (otimista/realista/pessimista/ajustado) | ✅ memória/**Postgres** |
+| consent-service | 8087 | Consentimentos de Open Finance (instituições, escopos, status) | ✅ memória/**Postgres** |
+| cohort-service | 8088 | Benchmarking de coorte (comparativos, drivers, recomendações) | ✅ memória/**Postgres** |
+| cards-service | 8089 | Cartões de crédito (resumo, faturas, gastos por categoria, lançamentos) | ✅ memória/**Postgres** |
+| investments-service | 8090 | Carteira (resumo, alocação, evolução, rentabilidade por classe, posições) | ✅ memória/**Postgres** |
+| categorization-service | 8091 | Categorias + tipos de transação (RF-004) e breakdown por categoria | ✅ memória/**Postgres** |
+| privacy-service | 8092 | Direitos do titular LGPD (portabilidade/eliminação); repo concorrente | ✅ memória/**Postgres** |
+| notification-service | 8093 | Feed consolidado de alertas (anomalia/orçamento/consentimento) | ✅ memória/**Postgres** |
+| audit-service | 8094 | Trilha de auditoria append-only imutável (backend-only) | ✅ memória/**Postgres** (com teste) |
 | **packages/httpkit** | — | Lib compartilhada: respostas JSON, middlewares de segurança, JWT/Authn, LoadConfig | ✅ |
 
 **Segurança aplicada nos serviços:** transporte READ-ONLY no conector (5 camadas,
@@ -45,8 +45,8 @@ PII; segredos fora do código (`.env` por serviço; produção via Secrets Manag
   - Contas ✅ · Transações ✅ (com nome amigável da conta) · ContaDetalhe ✅ (conta + transações; histórico via balance-history) · Overview ✅ (patrimônio + últimas transações + cashflow/categorias/série de saldo via analytics).
   - Orçamento ✅ (budget-service: metas, sugestões, comprometimento) · Projeções ✅ (projection-service) · Privacidade ✅ (consent-service) · Benchmarking ✅ (cohort-service).
   - Cartões ✅ (cards-service) · Investimentos ✅ (investments-service).
-  - Categorias ✅ (categorization-service: breakdown + cadastro + tipos) · Alertas ✅ (notification-service) · Direitos LGPD ✅ (privacy-service: botões Exportar/Excluir).
-- **Ainda mock:** gráficos estatísticos avançados (treemap/sunburst/heatmap/bolhas/radar/box em Categorias, scatter de anomalias em Alertas) — são **analytics** e ficam para o precompute do analytics-service.
+  - Categorias ✅ (categorization-service + **gráficos avançados via analytics-service**: treemap/sunburst/heatmap/bolhas/radar/box) · Alertas ✅ (notification-service + **scatter de anomalias via analytics**) · Direitos LGPD ✅ (privacy-service: botões Exportar/Excluir).
+- **Cobertura:** todas as 11 páginas e todos os gráficos consomem seus serviços (fallback ao mock quando offline). Os 8 gráficos avançados viraram componentes data-driven servidos pelos endpoints `GET /api/v1/analytics/categories` e `/anomalies`.
 
 ## Como rodar (dev)
 
