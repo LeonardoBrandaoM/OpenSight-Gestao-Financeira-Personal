@@ -23,6 +23,8 @@ por usuário** e **JWT**.
 | projection-service | 8086 | Cenários de projeção (otimista/realista/pessimista/ajustado) | ✅ (memória) |
 | consent-service | 8087 | Consentimentos de Open Finance (instituições, escopos, status) | ✅ (memória) |
 | cohort-service | 8088 | Benchmarking de coorte (comparativos, drivers, recomendações) | ✅ (memória) |
+| cards-service | 8089 | Cartões de crédito (resumo, faturas, gastos por categoria, lançamentos) | ✅ (memória) |
+| investments-service | 8090 | Carteira (resumo, alocação, evolução, rentabilidade por classe, posições) | ✅ (memória) |
 | privacy / notification / audit / categorization | — | demais serviços da arquitetura | ⏳ pendente |
 | **packages/httpkit** | — | Lib compartilhada: respostas JSON, middlewares de segurança, JWT/Authn, LoadConfig | ✅ |
 
@@ -39,7 +41,8 @@ PII; segredos fora do código (`.env` por serviço; produção via Secrets Manag
 - **Integração (live quando o backend está no ar; fallback ao mock):**
   - Contas ✅ · Transações ✅ (com nome amigável da conta) · ContaDetalhe ✅ (conta + transações; histórico via balance-history) · Overview ✅ (patrimônio + últimas transações + cashflow/categorias/série de saldo via analytics).
   - Orçamento ✅ (budget-service: metas, sugestões, comprometimento) · Projeções ✅ (projection-service) · Privacidade ✅ (consent-service) · Benchmarking ✅ (cohort-service).
-- **Ainda mock:** gráficos analíticos de Categorias, páginas de Cartões/Investimentos (dados dedicados).
+  - Cartões ✅ (cards-service) · Investimentos ✅ (investments-service).
+- **Ainda mock:** gráficos analíticos de Categorias (dados dedicados).
 
 ## Como rodar (dev)
 
