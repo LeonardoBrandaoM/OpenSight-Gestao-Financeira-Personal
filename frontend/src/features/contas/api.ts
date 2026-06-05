@@ -25,6 +25,7 @@ const tipoMap: Record<string, Conta['tipo']> = {
 
 function toConta(a: AccountDTO): Conta {
   return {
+    id: a.id,
     instituicao: a.institution,
     tipo: tipoMap[a.type] ?? 'Conta corrente',
     apelido: a.nickname,

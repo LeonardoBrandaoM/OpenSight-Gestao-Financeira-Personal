@@ -62,3 +62,16 @@ export async function fetchTransacoes(signal?: AbortSignal): Promise<Transacao[]
   ]);
   return tx.results.map((t) => toTransacao(t, labels));
 }
+
+// Transações de uma conta específica (usado no detalhamento da conta).
+export async function fetchTransacoesByAccount(accountId: string, signal?: AbortSignal): Promise<Transacao[]> {
+  const [tx, labels] = await Promise.all([
+    apiGet<TransactionsResponse>(
+      services.transactions,
+      `/api/v1/transactions?accountId=${encodeURIComponent(accountId)}`,
+      { signal },
+    ),
+    accountLabels(signal),
+  ]);
+  return tx.results.map((t) => toTransacao(t, labels));
+}

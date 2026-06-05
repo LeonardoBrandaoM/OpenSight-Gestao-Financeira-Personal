@@ -13,13 +13,24 @@ import {
 } from '@/shared/charts';
 import { BudgetList } from '@/features/orcamento/components/BudgetList';
 import { TransactionsTable } from '@/features/transacoes/components/TransactionsTable';
+import { useContas } from '@/features/contas/useContas';
+import { useTransacoes } from '@/features/transacoes/useTransacoes';
 
 export function Overview() {
+  // Dados ao vivo onde já há serviço: patrimônio (soma das contas) e últimas
+  // transações. As demais séries seguem mock até existir o analytics-service.
+  const { contas } = useContas();
+  const { transacoes } = useTransacoes();
+
+  const patrimonio = contas.reduce((s, c) => s + c.saldo, 0);
+  const liveKpis = kpis.map((k) => (k.tipo === 'patrimonio' && patrimonio > 0 ? { ...k, valor: patrimonio } : k));
+  const recentes = transacoes.slice(0, 12);
+
   return (
     <div className="space-y-4 p-6">
       {/* KPIs */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((k) => (
+        {liveKpis.map((k) => (
           <StatCard key={k.label} kpi={k} />
         ))}
       </section>
@@ -67,7 +78,7 @@ export function Overview() {
         </Panel>
 
         <Panel title="Últimas transações" note="somente leitura" className="lg:col-span-3">
-          <TransactionsTable />
+          <TransactionsTable data={recentes.length ? recentes : undefined} />
         </Panel>
       </section>
     </div>
