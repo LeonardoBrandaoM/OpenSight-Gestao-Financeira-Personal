@@ -36,8 +36,14 @@ export function HeatmapGrid({
   );
 }
 
-export function HeatmapCatMes() {
-  return <HeatmapGrid rows={heatCategorias} cols={meses.map(fmtMes)} matrix={heatmapCatMes} />;
+export function HeatmapCatMes({
+  categorias = heatCategorias,
+  matrix = heatmapCatMes,
+}: {
+  categorias?: string[];
+  matrix?: number[][];
+}) {
+  return <HeatmapGrid rows={categorias} cols={meses.map(fmtMes)} matrix={matrix} />;
 }
 export function HorarioPicoHeatmap() {
   return <HeatmapGrid rows={diasSemana} cols={horas.map((h) => `${h}h`)} matrix={horarioPico} colTick={3} />;

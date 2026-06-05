@@ -7,6 +7,7 @@ import {
   type TipoTransacao,
 } from '@/data/mock';
 import { useCategorias } from '../useCategorias';
+import { useCategoriaInsights } from '../useCategoriaInsights';
 import { Panel } from '@/shared/ui';
 import {
   BolhasScatter,
@@ -181,6 +182,7 @@ function GerenciarCategorias({ cadastro, tiposIniciais }: { cadastro: CategoriaC
 export function Categorias() {
   const { data } = useCategorias();
   const { breakdown, cadastro, tipos } = data;
+  const { insights } = useCategoriaInsights();
   const total = breakdown.reduce((s, c) => s + c.valor, 0);
   const ordenadas = [...breakdown].sort((a, b) => b.valor - a.valor);
 
@@ -199,28 +201,28 @@ export function Categorias() {
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Distribuição por categoria" note="treemap">
-          <CategoriaTreemap />
+          <CategoriaTreemap data={insights.treemap} />
         </Panel>
         <Panel title="Hierarquia de gastos" note="crédito × débito">
-          <HierarquiaSunburst />
+          <HierarquiaSunburst interna={insights.hierarquiaInterna} externa={insights.hierarquiaExterna} />
         </Panel>
       </section>
 
       <Panel title="Gastos por categoria e mês" note="heatmap">
-        <HeatmapCatMes />
+        <HeatmapCatMes categorias={insights.heatCategorias} matrix={insights.heatmap} />
       </Panel>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Frequência × volume × ticket médio" note="bolha = ticket">
-          <BolhasScatter />
+          <BolhasScatter data={insights.bolhas} />
         </Panel>
         <Panel title="Gastos por dia da semana" note="radar">
-          <RadarDiaSemana />
+          <RadarDiaSemana data={insights.radar} />
         </Panel>
       </section>
 
       <Panel title="Evolução da média mensal por categoria" note="13 meses">
-        <MediaMensalLinhas />
+        <MediaMensalLinhas series={insights.seriesMediaMensal} data={insights.mediaMensal} />
       </Panel>
 
       <Panel title="Detalhamento" note={`total ${brl(total)}`}>

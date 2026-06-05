@@ -15,6 +15,8 @@ func NewRouter(repo repository.AnalyticsRepository, cfg config.Config, authPub *
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", h.health)
 	mux.HandleFunc("GET /api/v1/analytics/overview", h.overview)
+	mux.HandleFunc("GET /api/v1/analytics/categories", h.categories)
+	mux.HandleFunc("GET /api/v1/analytics/anomalies", h.anomalies)
 
 	return httpx.Chain(mux,
 		httpx.Recoverer,

@@ -71,10 +71,16 @@ export function MetodoPagamentoDonut() {
 }
 
 // ===== Hierarquia de gastos (sunburst via 2 anéis) =====
-export function HierarquiaSunburst() {
+export function HierarquiaSunburst({
+  interna: internaData = hierarquiaInterna,
+  externa: externaData = hierarquiaExterna,
+}: {
+  interna?: typeof hierarquiaInterna;
+  externa?: typeof hierarquiaExterna;
+}) {
   const coresInternas: Record<string, string> = { 'Crédito': palette.gain, 'Débito': palette.info };
-  const interna = hierarquiaInterna.map((d) => ({ ...d, fill: coresInternas[d.nome] }));
-  const externa = hierarquiaExterna.map((d, i) => ({ ...d, fill: chartColors[i % chartColors.length] }));
+  const interna = internaData.map((d) => ({ ...d, fill: coresInternas[d.nome] }));
+  const externa = externaData.map((d, i) => ({ ...d, fill: chartColors[i % chartColors.length] }));
   return (
     <div>
       <ResponsiveContainer width="100%" height={220}>

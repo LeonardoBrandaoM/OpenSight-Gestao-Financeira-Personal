@@ -61,10 +61,10 @@ function TreemapTooltip({ active, payload }: any) {
     </div>
   );
 }
-export function CategoriaTreemap() {
+export function CategoriaTreemap({ data = treemapCategorias }: { data?: typeof treemapCategorias }) {
   return (
     <ResponsiveWrap>
-      <Treemap data={treemapCategorias} dataKey="valor" nameKey="nome" stroke={palette.void} isAnimationActive={false} content={<TreemapCell />}>
+      <Treemap data={data} dataKey="valor" nameKey="nome" stroke={palette.void} isAnimationActive={false} content={<TreemapCell />}>
         <Tooltip content={<TreemapTooltip />} />
       </Treemap>
     </ResponsiveWrap>

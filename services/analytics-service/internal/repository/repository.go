@@ -13,6 +13,8 @@ const DevUserID = "00000000-0000-0000-0000-000000000001"
 
 type AnalyticsRepository interface {
 	Overview(ctx context.Context, userID string) (domain.Overview, error)
+	CategoryInsights(ctx context.Context, userID string) (domain.CategoryInsights, error)
+	Anomalies(ctx context.Context, userID string) ([]domain.Anomalia, error)
 }
 
 type MemoryRepo struct {
