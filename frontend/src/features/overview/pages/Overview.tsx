@@ -13,13 +13,34 @@ import {
 } from '@/shared/charts';
 import { BudgetList } from '@/features/orcamento/components/BudgetList';
 import { TransactionsTable } from '@/features/transacoes/components/TransactionsTable';
+import { useContas } from '@/features/contas/useContas';
+import { useTransacoes } from '@/features/transacoes/useTransacoes';
+import { useAnalytics } from '../useAnalytics';
 
 export function Overview() {
+  // Dados ao vivo: patrimônio (contas), últimas transações e agregações do
+  // analytics-service (saldo, cashflow, por categoria, resumo). Sem backend, os
+  // gráficos caem no default (mock).
+  const { contas } = useContas();
+  const { transacoes } = useTransacoes();
+  const { data: analytics } = useAnalytics();
+
+  const patrimonio = contas.reduce((s, c) => s + c.saldo, 0);
+  const resumo = analytics?.resumo;
+  const liveKpis = kpis.map((k) => {
+    if (k.tipo === 'patrimonio' && patrimonio > 0) return { ...k, valor: patrimonio };
+    if (resumo && k.tipo === 'receita') return { ...k, valor: resumo.receitasMes };
+    if (resumo && k.tipo === 'despesa') return { ...k, valor: resumo.despesasMes };
+    if (resumo && k.tipo === 'economia') return { ...k, valor: resumo.economiaMes };
+    return k;
+  });
+  const recentes = transacoes.slice(0, 12);
+
   return (
     <div className="space-y-4 p-6">
       {/* KPIs */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((k) => (
+        {liveKpis.map((k) => (
           <StatCard key={k.label} kpi={k} />
         ))}
       </section>
@@ -27,19 +48,19 @@ export function Overview() {
       {/* Painéis */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Panel title="Saldo consolidado" note="11 meses" className="lg:col-span-2">
-          <BalanceArea />
+          <BalanceArea data={analytics?.balanceSeries} />
         </Panel>
 
         <Panel title="Distribuição por categoria" note="maio">
-          <CategoryDonut />
+          <CategoryDonut data={analytics?.byCategory} />
         </Panel>
 
         <Panel title="Gasto por categoria" note="maio">
-          <CategoryBar />
+          <CategoryBar data={analytics?.byCategory} />
         </Panel>
 
         <Panel title="Entrada × saída" note="6 meses">
-          <CashflowBars />
+          <CashflowBars data={analytics?.cashflow} />
         </Panel>
 
         <Panel title="Orçamento do mês" note="4 metas">
@@ -67,7 +88,7 @@ export function Overview() {
         </Panel>
 
         <Panel title="Últimas transações" note="somente leitura" className="lg:col-span-3">
-          <TransactionsTable />
+          <TransactionsTable data={recentes.length ? recentes : undefined} />
         </Panel>
       </section>
     </div>

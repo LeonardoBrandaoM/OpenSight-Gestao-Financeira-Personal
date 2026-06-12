@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import {
-  categorias,
-  categoriasCadastro,
   paletaCategoria,
-  tiposTransacao,
   type CategoriaCadastro,
   type EfeitoFluxo,
   type TipoCategoria,
   type TipoTransacao,
 } from '@/data/mock';
+import { useCategorias } from '../useCategorias';
+import { useCategoriaInsights } from '../useCategoriaInsights';
 import { Panel } from '@/shared/ui';
 import {
   BolhasScatter,
@@ -31,9 +30,9 @@ const tiposCategoria: TipoCategoria[] = ['despesa', 'receita', 'transferencia'];
 const efeitos: EfeitoFluxo[] = ['sai', 'entra', 'neutro'];
 
 // Gestão de categorias e tipos de transação personalizados (RF-004).
-function GerenciarCategorias() {
-  const [cats, setCats] = useState<CategoriaCadastro[]>(categoriasCadastro);
-  const [tipos, setTipos] = useState<TipoTransacao[]>(tiposTransacao);
+function GerenciarCategorias({ cadastro, tiposIniciais }: { cadastro: CategoriaCadastro[]; tiposIniciais: TipoTransacao[] }) {
+  const [cats, setCats] = useState<CategoriaCadastro[]>(cadastro);
+  const [tipos, setTipos] = useState<TipoTransacao[]>(tiposIniciais);
 
   const [nome, setNome] = useState('');
   const [tipoCat, setTipoCat] = useState<TipoCategoria>('despesa');
@@ -181,46 +180,49 @@ function GerenciarCategorias() {
 }
 
 export function Categorias() {
-  const total = categorias.reduce((s, c) => s + c.valor, 0);
-  const ordenadas = [...categorias].sort((a, b) => b.valor - a.valor);
+  const { data } = useCategorias();
+  const { breakdown, cadastro, tipos } = data;
+  const { insights } = useCategoriaInsights();
+  const total = breakdown.reduce((s, c) => s + c.valor, 0);
+  const ordenadas = [...breakdown].sort((a, b) => b.valor - a.valor);
 
   return (
     <div className="space-y-4 p-6">
-      <GerenciarCategorias />
+      <GerenciarCategorias cadastro={cadastro} tiposIniciais={tipos} />
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Distribuição por categoria" note="maio">
-          <CategoryDonut />
+          <CategoryDonut data={breakdown} />
         </Panel>
         <Panel title="Gasto por categoria" note="maio">
-          <CategoryBar />
+          <CategoryBar data={breakdown} />
         </Panel>
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Distribuição por categoria" note="treemap">
-          <CategoriaTreemap />
+          <CategoriaTreemap data={insights.treemap} />
         </Panel>
         <Panel title="Hierarquia de gastos" note="crédito × débito">
-          <HierarquiaSunburst />
+          <HierarquiaSunburst interna={insights.hierarquiaInterna} externa={insights.hierarquiaExterna} />
         </Panel>
       </section>
 
       <Panel title="Gastos por categoria e mês" note="heatmap">
-        <HeatmapCatMes />
+        <HeatmapCatMes categorias={insights.heatCategorias} matrix={insights.heatmap} />
       </Panel>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Frequência × volume × ticket médio" note="bolha = ticket">
-          <BolhasScatter />
+          <BolhasScatter data={insights.bolhas} />
         </Panel>
         <Panel title="Gastos por dia da semana" note="radar">
-          <RadarDiaSemana />
+          <RadarDiaSemana data={insights.radar} />
         </Panel>
       </section>
 
       <Panel title="Evolução da média mensal por categoria" note="13 meses">
-        <MediaMensalLinhas />
+        <MediaMensalLinhas series={insights.seriesMediaMensal} data={insights.mediaMensal} />
       </Panel>
 
       <Panel title="Detalhamento" note={`total ${brl(total)}`}>

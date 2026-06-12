@@ -32,7 +32,7 @@ function BolhaTip({ active, payload }: any) {
     </div>
   );
 }
-export function BolhasScatter() {
+export function BolhasScatter({ data = bolhasCategorias }: { data?: typeof bolhasCategorias }) {
   return (
     <ResponsiveWrap height={300}>
       <ScatterChart margin={{ top: 8, right: 16, left: 8, bottom: 16 }}>
@@ -41,8 +41,8 @@ export function BolhasScatter() {
         <YAxis type="number" dataKey="volume" name="Volume" tickFormatter={brlCompact} width={56} {...axisStyle} />
         <ZAxis type="number" dataKey="ticket" range={[120, 1400]} name="Ticket médio" />
         <Tooltip cursor={{ strokeDasharray: '3 3', stroke: palette.steel }} content={<BolhaTip />} />
-        <Scatter data={bolhasCategorias} isAnimationActive={false}>
-          {bolhasCategorias.map((_, i) => (
+        <Scatter data={data} isAnimationActive={false}>
+          {data.map((_, i) => (
             <Cell key={i} fill={chartColors[i % chartColors.length]} fillOpacity={0.8} />
           ))}
         </Scatter>
@@ -52,10 +52,10 @@ export function BolhasScatter() {
 }
 
 // ===== Gastos por dia da semana (radar) =====
-export function RadarDiaSemana() {
+export function RadarDiaSemana({ data = radarDiaSemana }: { data?: typeof radarDiaSemana }) {
   return (
     <ResponsiveWrap>
-      <RadarChart data={radarDiaSemana} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+      <RadarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
         <PolarGrid stroke={palette.graphite} />
         <PolarAngleAxis dataKey="dia" tick={{ fill: palette.ash, fontSize: 11 }} />
         <PolarRadiusAxis angle={90} tick={{ fill: palette.steel, fontSize: 9 }} stroke={palette.graphite} />
@@ -67,9 +67,9 @@ export function RadarDiaSemana() {
 }
 
 // ===== Detecção de anomalias (scatter) =====
-export function AnomaliasScatter() {
-  const normais = anomalias.filter((a) => !a.anomalia);
-  const anom = anomalias.filter((a) => a.anomalia);
+export function AnomaliasScatter({ data = anomalias }: { data?: typeof anomalias }) {
+  const normais = data.filter((a) => !a.anomalia);
+  const anom = data.filter((a) => a.anomalia);
   return (
     <ResponsiveWrap height={300}>
       <ScatterChart margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
@@ -86,16 +86,16 @@ export function AnomaliasScatter() {
 }
 
 // ===== Distribuição estatística por categoria (box plot, SVG) =====
-export function BoxPlotCategorias() {
+export function BoxPlotCategorias({ data = boxplotCategorias }: { data?: typeof boxplotCategorias }) {
   const W = 720;
   const H = 280;
   const padL = 48;
   const padB = 50;
   const padT = 12;
-  const todos = boxplotCategorias.flatMap((c) => [c.max, ...c.outliers]);
+  const todos = data.flatMap((c) => [c.max, ...c.outliers]);
   const max = Math.max(...todos) * 1.05;
   const yScale = (v: number) => padT + (H - padT - padB) * (1 - v / max);
-  const stepX = (W - padL) / boxplotCategorias.length;
+  const stepX = (W - padL) / data.length;
   const boxW = Math.min(36, stepX * 0.5);
   return (
     <div className="overflow-x-auto">
@@ -111,7 +111,7 @@ export function BoxPlotCategorias() {
             </g>
           );
         })}
-        {boxplotCategorias.map((c, i) => {
+        {data.map((c, i) => {
           const cx = padL + stepX * (i + 0.5);
           const cor = chartColors[i % chartColors.length];
           return (

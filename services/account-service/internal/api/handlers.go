@@ -51,3 +51,22 @@ func (h *Handlers) getAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	httpx.JSON(w, http.StatusOK, account)
 }
+
+// GET /api/v1/accounts/{id}/balance-history — histórico de saldo da conta.
+func (h *Handlers) getBalanceHistory(w http.ResponseWriter, r *http.Request) {
+	uid := UserID(r.Context())
+	id := r.PathValue("id")
+	pts, err := h.repo.BalanceHistory(r.Context(), uid, id)
+	if errors.Is(err, domain.ErrNotFound) {
+		httpx.Error(w, http.StatusNotFound, "not_found", "conta não encontrada")
+		return
+	}
+	if err != nil {
+		httpx.Error(w, http.StatusInternalServerError, "internal", "falha ao buscar histórico")
+		return
+	}
+	if pts == nil {
+		pts = []domain.BalancePoint{}
+	}
+	httpx.JSON(w, http.StatusOK, map[string]any{"results": pts})
+}

@@ -3,6 +3,7 @@ import { rng } from '@/shared/lib/mock-helpers';
 import type { Transacao } from '@/features/transacoes/data';
 
 export interface Conta {
+  id?: string; // id da conta no backend (account-service)
   instituicao: string;
   tipo: 'Conta corrente' | 'Cartão de crédito' | 'Investimentos' | 'Poupança';
   apelido: string;
@@ -17,10 +18,11 @@ export interface Conta {
   alocacao?: { classe: string; valor: number }[];
 }
 export const contas: Conta[] = [
-  { instituicao: 'Itaú', tipo: 'Conta corrente', apelido: '•••• 4471', saldo: 15400.0, delta: 0.8 },
-  { instituicao: 'Nubank', tipo: 'Conta corrente', apelido: '•••• 8820', saldo: 8230.71, delta: 2.1 },
-  { instituicao: 'Inter', tipo: 'Conta corrente', apelido: '•••• 1190', saldo: 4600.0, delta: -1.2 },
+  { id: 'acc-itau-4471', instituicao: 'Itaú', tipo: 'Conta corrente', apelido: '•••• 4471', saldo: 15400.0, delta: 0.8 },
+  { id: 'acc-nubank-8820', instituicao: 'Nubank', tipo: 'Conta corrente', apelido: '•••• 8820', saldo: 8230.71, delta: 2.1 },
+  { id: 'acc-inter-1190', instituicao: 'Inter', tipo: 'Conta corrente', apelido: '•••• 1190', saldo: 4600.0, delta: -1.2 },
   {
+    id: 'acc-xp-carteira',
     instituicao: 'XP',
     tipo: 'Investimentos',
     apelido: 'Carteira',
@@ -34,6 +36,7 @@ export const contas: Conta[] = [
     ],
   },
   {
+    id: 'acc-nubank-3041',
     instituicao: 'Nubank',
     tipo: 'Cartão de crédito',
     apelido: '•••• 3041',

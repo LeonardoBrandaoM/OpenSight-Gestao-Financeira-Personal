@@ -1,9 +1,12 @@
 import { useLocation } from 'react-router-dom';
 import { navItems } from '@/shared/nav';
 import { syncStatus } from '@/data/mock';
+import { useAuth } from '@/shared/auth/auth';
 
 export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const { pathname } = useLocation();
+  const { email, status, logout } = useAuth();
+  const initial = (email?.[0] ?? 'U').toUpperCase();
   const current =
     navItems.find((n) => n.path === pathname) ??
     navItems.find((n) => n.path !== '/' && pathname.startsWith(`${n.path}/`)) ??
@@ -43,8 +46,19 @@ export function Topbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
           <span className="value text-xs text-bone">{syncStatus.consentimentoExpiraEm}d</span>
         </div>
 
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-graphite bg-gunmetal font-display text-sm font-semibold text-bone">
-          LM
+        <div className="flex items-center gap-2">
+          <div className="hidden text-right sm:block">
+            <div className="max-w-[12rem] truncate text-xs text-bone">
+              {email ?? 'usuário'}
+              {status === 'demo' ? ' (demo)' : ''}
+            </div>
+            <button type="button" onClick={logout} className="text-[0.65rem] text-ash transition-colors hover:text-loss">
+              Sair
+            </button>
+          </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-graphite bg-gunmetal font-display text-sm font-semibold text-bone">
+            {initial}
+          </div>
         </div>
       </div>
     </header>

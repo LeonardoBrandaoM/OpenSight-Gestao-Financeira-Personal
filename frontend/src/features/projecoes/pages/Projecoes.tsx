@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { projecao } from '@/data/mock';
 import { Panel } from '@/shared/ui';
 import { ProjectionLines } from '@/shared/charts';
 import { useConsent } from '@/shared/context/consent';
 import { brl } from '@/shared/theme/tokens';
+import { useProjecoes } from '../useProjecoes';
 
 function ScenarioCard({ label, value, tone, dashed }: { label: string; value: number; tone: string; dashed?: boolean }) {
   return (
@@ -25,7 +25,8 @@ function ScenarioCard({ label, value, tone, dashed }: { label: string; value: nu
 }
 
 export function Projecoes() {
-  const ultimo = projecao[projecao.length - 1];
+  const { cenarios } = useProjecoes();
+  const ultimo = cenarios[cenarios.length - 1] ?? { mes: '', otimista: 0, realista: 0, pessimista: 0, ajustado: 0 };
   const { benchmarking } = useConsent();
   // Só permite ver o ajuste por pares se houver consentimento de benchmarking.
   const [verPares, setVerPares] = useState(false);
@@ -58,7 +59,7 @@ export function Projecoes() {
           )
         }
       >
-        <ProjectionLines peerAdjusted={ajusteAtivo} />
+        <ProjectionLines peerAdjusted={ajusteAtivo} data={cenarios} />
       </Panel>
 
       {benchmarking ? (

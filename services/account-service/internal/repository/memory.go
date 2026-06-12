@@ -2,11 +2,27 @@ package repository
 
 import (
 	"context"
+	"math"
 	"sync"
 	"time"
 
 	"opensight/services/account-service/internal/domain"
 )
+
+// histMeses são os meses do histórico de saldo sintético (até existir um
+// endpoint de histórico real alimentado pelo sync).
+var histMeses = []string{"Nov", "Dez", "Jan", "Fev", "Mar", "Abr", "Mai"}
+
+func seriesFromBalance(cents int64) []domain.BalancePoint {
+	base := float64(cents) / 100
+	delta := base * 0.02
+	out := make([]domain.BalancePoint, len(histMeses))
+	for i := range histMeses {
+		saldo := base - float64(len(histMeses)-1-i)*delta
+		out[i] = domain.BalancePoint{Mes: histMeses[i], Saldo: math.Round(saldo*100) / 100}
+	}
+	return out
+}
 
 // DevUserID é o usuário-semente usado em desenvolvimento (sem DB nem auth real).
 const DevUserID = "00000000-0000-0000-0000-000000000001"
@@ -51,4 +67,15 @@ func (m *MemoryRepo) Get(_ context.Context, userID, id string) (domain.Account, 
 		}
 	}
 	return domain.Account{}, domain.ErrNotFound
+}
+
+func (m *MemoryRepo) BalanceHistory(_ context.Context, userID, accountID string) ([]domain.BalancePoint, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for _, a := range m.data[userID] {
+		if a.ID == accountID {
+			return seriesFromBalance(a.BalanceCents), nil
+		}
+	}
+	return nil, domain.ErrNotFound
 }

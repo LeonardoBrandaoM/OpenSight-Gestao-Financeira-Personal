@@ -1,7 +1,7 @@
-import { investResumo, carteiraAlocacao, carteiraEvolucao, rendimentoPorClasse, posicoes } from '@/data/mock';
 import { Panel, DeltaChip } from '@/shared/ui';
 import { CarteiraDonut, CarteiraEvolucaoArea, RentabilidadeClasseBar } from '@/features/investimentos/charts/investimentos';
 import { brl, chartColors } from '@/shared/theme/tokens';
+import { useInvestimentos } from '../useInvestimentos';
 
 function MiniStat({ label, value, tone = 'bone' }: { label: string; value: string; tone?: string }) {
   return (
@@ -20,6 +20,8 @@ const corClasse: Record<string, string> = {
 };
 
 export function Investimentos() {
+  const { data } = useInvestimentos();
+  const { resumo: investResumo, alocacao: carteiraAlocacao, evolucao: carteiraEvolucao, rendimentoPorClasse, posicoes } = data;
   const total = posicoes.reduce((s, p) => s + p.valor, 0);
 
   return (

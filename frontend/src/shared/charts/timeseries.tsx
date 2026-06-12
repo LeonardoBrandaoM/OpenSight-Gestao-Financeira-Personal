@@ -68,16 +68,22 @@ export function ComparativoComposed() {
 }
 
 // ===== Evolução da média mensal por categoria (multi-linha) =====
-export function MediaMensalLinhas() {
+export function MediaMensalLinhas({
+  series = seriesMediaMensal,
+  data = mediaMensalCategorias,
+}: {
+  series?: string[];
+  data?: typeof mediaMensalCategorias;
+}) {
   return (
     <ResponsiveWrap height={300}>
-      <LineChart data={mediaMensalCategorias} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
+      <LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }}>
         <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" vertical={false} />
         <XAxis dataKey="mes" tickFormatter={fmtMes} {...axisStyle} />
         <YAxis tickFormatter={brlCompact} width={56} {...axisStyle} />
         <Tooltip content={<MiniTooltip />} />
         <Legend wrapperStyle={{ fontSize: 11 }} />
-        {seriesMediaMensal.map((s, i) => (
+        {series.map((s, i) => (
           <Line key={s} type="monotone" name={s} dataKey={s} stroke={chartColors[i % chartColors.length]} strokeWidth={2} dot={false} isAnimationActive={false} />
         ))}
       </LineChart>

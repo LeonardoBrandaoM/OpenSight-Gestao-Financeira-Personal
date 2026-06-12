@@ -1,9 +1,9 @@
 import { Link, useParams } from 'react-router-dom';
-import { getContaDetalhe } from '@/data/mock';
 import { Panel, DeltaChip } from '@/shared/ui';
 import { TransactionsTable } from '@/features/transacoes/components/TransactionsTable';
 import { SaldoContaArea, CategoriaContaBar } from '@/features/contas/charts/conta';
 import { brl } from '@/shared/theme/tokens';
+import { useContaDetalhe } from '../useContaDetalhe';
 
 function MiniStat({ label, value, className = '' }: { label: string; value: string; className?: string }) {
   return (
@@ -17,7 +17,15 @@ function MiniStat({ label, value, className = '' }: { label: string; value: stri
 export function ContaDetalhe() {
   const { id } = useParams();
   const index = Number(id);
-  const detalhe = Number.isInteger(index) ? getContaDetalhe(index) : null;
+  const { data: detalhe, loading, fromMock } = useContaDetalhe(index);
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="panel p-8 text-center text-sm text-ash">Carregando conta…</div>
+      </div>
+    );
+  }
 
   if (!detalhe) {
     return (
@@ -36,6 +44,13 @@ export function ContaDetalhe() {
 
   return (
     <div className="space-y-4 p-6">
+      {fromMock && (
+        <div className="panel border-l-4 border-l-warning p-3 text-xs text-ash">
+          <span className="label-stencil text-[0.6rem] !text-warning">Backend indisponível</span>{' '}
+          exibindo dados de exemplo.
+        </div>
+      )}
+
       {/* Cabeçalho da conta */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -67,7 +82,7 @@ export function ContaDetalhe() {
 
       {/* Gráficos básicos da conta */}
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel title="Evolução do saldo" note="últimos 7 meses">
+        <Panel title="Evolução do saldo" note="estimado">
           <SaldoContaArea data={historico} />
         </Panel>
         <Panel title="Gastos por categoria" note="no mês">
